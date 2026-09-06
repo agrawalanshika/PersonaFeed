@@ -1,3 +1,5 @@
+import ApiConnectivityCheck from "@/components/content/ApiConnectivityCheck";
+
 const SECTIONS = [
   { label: "Trending news", detail: "Top stories across your interests" },
   { label: "Trending movies", detail: "Popular titles on TMDB right now" },
@@ -23,6 +25,8 @@ export default function TrendingPage() {
           </div>
         ))}
       </div>
+
+      <ApiConnectivityCheck />
     </div>
   );
 }

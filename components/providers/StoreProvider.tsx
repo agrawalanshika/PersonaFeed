@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
+import { setupListeners } from "@reduxjs/toolkit/query";
 import { makeStore, type AppStore } from "@/store";
 import { setPreferences } from "@/store/slices/preferencesSlice";
 import { loadPreferences, savePreferences } from "@/lib/storage";
@@ -22,11 +23,17 @@ export default function StoreProvider({
       store.dispatch(setPreferences(stored));
     }
 
-    const unsubscribe = store.subscribe(() => {
+    const unsubscribeStorage = store.subscribe(() => {
       savePreferences(store.getState().preferences);
     });
 
-    return unsubscribe;
+    // Enables RTK Query's refetchOnFocus/refetchOnReconnect behavior.
+    const unsubscribeListeners = setupListeners(store.dispatch);
+
+    return () => {
+      unsubscribeStorage();
+      unsubscribeListeners();
+    };
   }, [store]);
 
   return <Provider store={store}>{children}</Provider>;
