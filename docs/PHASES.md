@@ -42,10 +42,19 @@ end-to-end demo.
 `toggleInterest`/`toggleMoviePreference`. `StoreProvider` restores
 preferences from localStorage on mount and persists on every change.
 
+## Phase 6 — API Service Layer ✅
+Route Handlers `app/api/news/route.ts` and `app/api/tmdb/route.ts` proxy
+News API and TMDB server-side, so `NEWS_API_KEY`/`TMDB_API_KEY` never reach
+the browser and News API's client-side CORS restriction is avoided.
+`services/newsApi.ts`, `services/tmdbApi.ts` (RTK Query, hitting our own
+`/api/*` routes), `services/socialApi.ts` (mock data, no external call,
+`fakeBaseQuery`). All three wired into the store (`configureStore`
+middleware). Temporary `ApiConnectivityCheck` on the Trending page proves
+each adapter returns real data — removed in Phase 11.
+
 ---
 
 ## Not yet built (upcoming phases)
-6. API service layer (News API, TMDB, mock social) — `services/`
 7. Data normalization → unified `ContentItem` (finalizes the draft type)
 8. Personalized feed engine (replaces `lib/sample-content.ts`)
 9. Interactive content cards (favorite/CTA fully wired to real data)
