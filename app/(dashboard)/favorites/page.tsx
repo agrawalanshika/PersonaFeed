@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
 
 export default function FavoritesPage() {
   return (
@@ -8,13 +9,11 @@ export default function FavoritesPage() {
         news, movies, and social posts. Favoriting is wired up in Phase 10.
       </p>
 
-      <div className="flex flex-col items-center justify-center gap-3 rounded-md border border-dashed border-border py-16 text-center">
-        <Star size={28} className="text-muted" aria-hidden="true" />
-        <p className="text-sm font-medium">No favorites yet</p>
-        <p className="max-w-xs text-sm text-muted">
-          Once favoriting is live, saved items will show up in this space.
-        </p>
-      </div>
+      <EmptyState
+        icon={Star}
+        title="No favorites yet"
+        description="Once favoriting is live, saved items will show up in this space."
+      />
     </div>
   );
 }

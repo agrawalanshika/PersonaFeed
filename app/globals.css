@@ -10,6 +10,9 @@
   --accent-foreground: #ffffff;
   --accent-soft: #ecebfb;
   --highlight: #c97a2b;
+  --danger: #b3261e;
+  --danger-soft: #fbeae9;
+  --success: #2e6b4f;
 }
 
 @theme inline {
@@ -22,6 +25,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-soft: var(--accent-soft);
   --color-highlight: var(--highlight);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -37,6 +43,9 @@
     --accent-foreground: #14151a;
     --accent-soft: #262550;
     --highlight: #e0994f;
+    --danger: #e5867f;
+    --danger-soft: #3a2325;
+    --success: #6fbf9a;
   }
 }
 
