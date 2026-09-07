@@ -7,6 +7,7 @@ export interface SocialPost {
   author: string;
   handle: string;
   content: string;
+  image: string;
   likes: number;
   postedAt: string;
   tags: string[];
@@ -18,6 +19,7 @@ const MOCK_POSTS: SocialPost[] = [
     author: "Dev Notes",
     handle: "@devnotes",
     content: "10 lessons from building a design system from scratch this year.",
+    image: "https://picsum.photos/seed/social-1/600/400",
     likes: 482,
     postedAt: "2026-09-01T10:00:00Z",
     tags: ["technology", "business"],
@@ -27,6 +29,7 @@ const MOCK_POSTS: SocialPost[] = [
     author: "Trail Mix",
     handle: "@trailmix",
     content: "Photo dump from the weekend hike \u{1F3D4}\uFE0F — best views in months.",
+    image: "https://picsum.photos/seed/social-2/600/400",
     likes: 1210,
     postedAt: "2026-09-02T14:30:00Z",
     tags: ["entertainment"],
@@ -36,6 +39,7 @@ const MOCK_POSTS: SocialPost[] = [
     author: "Market Pulse",
     handle: "@marketpulse",
     content: "Quarterly earnings season kicks off next week — here's what to watch.",
+    image: "https://picsum.photos/seed/social-3/600/400",
     likes: 356,
     postedAt: "2026-09-03T08:15:00Z",
     tags: ["finance", "business"],
@@ -45,6 +49,7 @@ const MOCK_POSTS: SocialPost[] = [
     author: "Lab Notes",
     handle: "@labnotes",
     content: "New study on battery chemistry could double EV range by 2030.",
+    image: "https://picsum.photos/seed/social-4/600/400",
     likes: 890,
     postedAt: "2026-09-03T16:45:00Z",
     tags: ["science", "technology"],
@@ -54,6 +59,7 @@ const MOCK_POSTS: SocialPost[] = [
     author: "Courtside",
     handle: "@courtside",
     content: "That fourth-quarter comeback last night was one for the history books.",
+    image: "https://picsum.photos/seed/social-5/600/400",
     likes: 2043,
     postedAt: "2026-09-04T02:00:00Z",
     tags: ["sports"],
@@ -63,6 +69,7 @@ const MOCK_POSTS: SocialPost[] = [
     author: "Screen Time",
     handle: "@screentime",
     content: "This year's festival lineup just leaked and it's stacked.",
+    image: "https://picsum.photos/seed/social-6/600/400",
     likes: 675,
     postedAt: "2026-09-04T11:20:00Z",
     tags: ["entertainment"],

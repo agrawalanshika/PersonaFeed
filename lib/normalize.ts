@@ -52,9 +52,12 @@ export function normalizeSocial(posts: SocialPost[]): ContentItem[] {
     title:
       post.content.length > 60 ? `${post.content.slice(0, 60)}…` : post.content,
     description: post.content,
+    image: post.image,
     author: post.author,
     source: post.handle,
-    url: `https://threadly.example/post/${post.id}`,
+    // Mock data has no real destination — "#" avoids a dead-link click to a
+    // domain that was never meant to resolve.
+    url: "#",
     actionLabel: "View Post",
     publishedAt: post.postedAt,
     tags: post.tags,
