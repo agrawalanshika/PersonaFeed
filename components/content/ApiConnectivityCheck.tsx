@@ -47,7 +47,7 @@ export default function ApiConnectivityCheck() {
           onRetry={movies.refetch}
         />
         <ApiCheckSlot
-          label="Mock social"
+          label="Reddit"
           isLoading={social.isLoading}
           error={social.error}
           item={socialItem}
@@ -90,8 +90,11 @@ function ApiCheckSlot({
 
 function describeError(error: unknown): string {
   if (typeof error === "object" && error !== null && "data" in error) {
-    const data = (error as { data?: { error?: string } }).data;
-    if (data?.error) return data.error;
+    const data = (error as { data?: { error?: string; detail?: string } })
+      .data;
+    if (data?.error) {
+      return data.detail ? `${data.error} — ${data.detail}` : data.error;
+    }
   }
   return "Request failed.";
 }
