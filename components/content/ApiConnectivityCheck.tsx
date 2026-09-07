@@ -47,7 +47,7 @@ export default function ApiConnectivityCheck() {
           onRetry={movies.refetch}
         />
         <ApiCheckSlot
-          label="Reddit"
+          label="Mastodon"
           isLoading={social.isLoading}
           error={social.error}
           item={socialItem}

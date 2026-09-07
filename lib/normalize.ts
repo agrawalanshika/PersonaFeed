@@ -1,7 +1,7 @@
 import type { ContentItem } from "@/types/content";
 import type { NewsApiArticle } from "@/services/newsApi";
 import type { TmdbMovie } from "@/services/tmdbApi";
-import type { RedditPost } from "@/services/socialApi";
+import type { MastodonStatus } from "@/services/socialApi";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 
@@ -45,31 +45,27 @@ export function normalizeMovie(
   }));
 }
 
-export function normalizeSocial(posts: RedditPost[]): ContentItem[] {
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").trim();
+}
+
+export function normalizeSocial(posts: MastodonStatus[]): ContentItem[] {
   return posts.map((post) => {
-    // Reddit escapes "&" as "&amp;" in preview URLs.
-    const previewImage = post.preview?.images?.[0]?.source?.url?.replace(
-      /&amp;/g,
-      "&",
-    );
-    const thumbnail = post.thumbnail?.startsWith("http")
-      ? post.thumbnail
-      : undefined;
+    const text = stripHtml(post.content) || "View this post on Mastodon.";
+    const image = post.media_attachments?.[0]?.preview_url;
 
     return {
       id: post.id,
       type: "social",
-      title: post.title,
-      description: post.selftext
-        ? post.selftext.slice(0, 200)
-        : "View the discussion on Reddit.",
-      image: previewImage ?? thumbnail,
-      author: `u/${post.author}`,
-      source: `r/${post.subreddit}`,
-      url: `https://www.reddit.com${post.permalink}`,
+      title: text.length > 60 ? `${text.slice(0, 60)}…` : text,
+      description: text,
+      image,
+      author: post.account.display_name || post.account.username,
+      source: `@${post.account.username}`,
+      url: post.url,
       actionLabel: "View Post",
-      publishedAt: new Date(post.created_utc * 1000).toISOString(),
-      tags: [post.subreddit],
+      publishedAt: post.created_at,
+      tags: post.tags.map((tag) => tag.name),
     };
   });
 }

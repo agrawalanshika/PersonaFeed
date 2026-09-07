@@ -81,6 +81,20 @@ requires a free Reddit "script" app, see README), then calls
 `oauth.reddit.com` instead of the public JSON mirror. More reliable than
 the unauthenticated route.
 
+**Update 3:** Reddit's own app-creation page (`reddit.com/prefs/apps`)
+requires a Google reCAPTCHA that failed to render/respond for the user
+(likely network/extension-level blocking of Google's recaptcha domains,
+unrelated to this codebase) — made getting Reddit credentials
+impractical. Replaced Reddit entirely with **Mastodon's public timeline
+API** (`mastodon.social/api/v1/timelines/tag/<hashtag>`) — genuinely
+zero setup: no account, no API key, no CAPTCHA, no OAuth.
+`services/socialApi.ts` now defines `MastodonStatus`; `normalizeSocial()`
+strips HTML from post content and maps account/media/tag fields.
+Categories map to hashtags instead of subreddits. Search is implemented
+as a hashtag lookup (Mastodon's public API has no unauthenticated
+full-text search) — a reasonable placeholder until Phase 12 builds real
+search UX.
+
 ---
 
 ## Not yet built (upcoming phases)

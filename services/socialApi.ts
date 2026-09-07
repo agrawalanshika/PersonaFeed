@@ -1,25 +1,17 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-/** Raw Reddit post shape — normalized into ContentItem in Phase 7. */
-export interface RedditPost {
+/** Raw Mastodon status shape — normalized into ContentItem in Phase 7. */
+export interface MastodonStatus {
   id: string;
-  title: string;
-  selftext: string;
-  author: string;
-  subreddit: string;
-  ups: number;
-  created_utc: number;
-  permalink: string;
-  thumbnail: string;
-  preview?: {
-    images: { source: { url: string } }[];
+  content: string;
+  created_at: string;
+  url: string;
+  account: {
+    username: string;
+    display_name: string;
   };
-}
-
-interface RedditListingResponse {
-  data: {
-    children: { data: RedditPost }[];
-  };
+  media_attachments: { type: string; preview_url: string; url: string }[];
+  tags: { name: string }[];
 }
 
 export const socialApi = createApi({
@@ -27,7 +19,7 @@ export const socialApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: "/api/social" }),
   endpoints: (builder) => ({
     getTrendingSocialPosts: builder.query<
-      RedditPost[],
+      MastodonStatus[],
       { category?: string } | void
     >({
       query: (arg) => {
@@ -35,16 +27,12 @@ export const socialApi = createApi({
         if (arg?.category) params.category = arg.category;
         return { url: "", params };
       },
-      transformResponse: (response: RedditListingResponse) =>
-        response.data.children.map((child) => child.data),
     }),
-    searchSocialPosts: builder.query<RedditPost[], { query: string }>({
+    searchSocialPosts: builder.query<MastodonStatus[], { query: string }>({
       query: ({ query }) => ({
         url: "",
         params: { type: "search", q: query },
       }),
-      transformResponse: (response: RedditListingResponse) =>
-        response.data.children.map((child) => child.data),
     }),
   }),
 });
