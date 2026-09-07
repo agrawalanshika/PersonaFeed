@@ -1,8 +1,14 @@
 "use client";
 
-import { Heart, Star } from "lucide-react";
-import type { ContentItem } from "@/types/content";
+import { Heart, Star, Newspaper, Clapperboard, MessageCircle } from "lucide-react";
+import type { ContentItem, ContentType } from "@/types/content";
 import Badge from "@/components/ui/Badge";
+
+const PLACEHOLDER_ICON: Record<ContentType, typeof Newspaper> = {
+  news: Newspaper,
+  movie: Clapperboard,
+  social: MessageCircle,
+};
 
 type ContentCardProps = {
   item: ContentItem;
@@ -15,6 +21,8 @@ export default function ContentCard({
   isFavorited = false,
   onToggleFavorite,
 }: ContentCardProps) {
+  const PlaceholderIcon = PLACEHOLDER_ICON[item.type];
+
   return (
     <article className="flex flex-col overflow-hidden rounded-md border border-border bg-surface">
       <div className="relative aspect-video bg-background">
@@ -26,8 +34,9 @@ export default function ContentCard({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-muted">
-            No image
+          <div className="flex h-full flex-col items-center justify-center gap-2 bg-accent-soft/40 text-muted">
+            <PlaceholderIcon size={28} aria-hidden="true" />
+            <span className="text-xs">No image available</span>
           </div>
         )}
 
