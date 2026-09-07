@@ -52,11 +52,20 @@ the browser and News API's client-side CORS restriction is avoided.
 middleware). Temporary `ApiConnectivityCheck` on the Trending page proves
 each adapter returns real data — removed in Phase 11.
 
+## Phase 7 — Data Normalization ✅
+`types/content.ts` finalized: added `publishedAt` and `tags` (beyond the
+original draft) to support chronological sorting and interest matching in
+Phase 8. `lib/normalize.ts` — `normalizeNews()`, `normalizeMovie()`,
+`normalizeSocial()`, each converting one raw API shape into `ContentItem[]`.
+News normalization filters out `[Removed]` articles (a known News API
+artifact for takedown articles). The Trending page's temporary check now
+runs the full pipeline — raw API response → normalize → `ContentCard` —
+proving all three adapters produce genuinely renderable, unified data.
+
 ---
 
 ## Not yet built (upcoming phases)
-7. Data normalization → unified `ContentItem` (finalizes the draft type)
-8. Personalized feed engine (replaces `lib/sample-content.ts`)
+8. Personalized feed engine (replaces `lib/sample-content.ts`, uses `normalize*()` + preferences)
 9. Interactive content cards (favorite/CTA fully wired to real data)
 10. Favorites (persisted, dedicated view)
 11. Trending

@@ -1,9 +1,11 @@
 /**
- * Draft version of the unified content model.
- * This is intentionally minimal for Phase 3 (design system only — no real
- * data yet). Phase 7 (data normalization) will finalize this shape once
- * normalizeNews(), normalizeMovie(), and normalizeSocial() exist, and may
- * add fields as real API responses are mapped in.
+ * The unified content model — every card in the app renders one of these,
+ * regardless of which API it came from. Finalized in Phase 7 alongside
+ * normalizeNews(), normalizeMovie(), and normalizeSocial() (see lib/normalize.ts).
+ *
+ * `publishedAt` and `tags` were added here (beyond the original draft) to
+ * support chronological sorting and interest-based personalization in the
+ * Phase 8 feed engine.
  */
 export type ContentType = "news" | "movie" | "social";
 
@@ -18,4 +20,8 @@ export interface ContentItem {
   rating?: number;
   url: string;
   actionLabel: string;
+  /** ISO 8601 timestamp, when the source provides one. */
+  publishedAt?: string;
+  /** Category/genre labels used to match content against user interests. */
+  tags?: string[];
 }
