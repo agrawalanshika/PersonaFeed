@@ -62,6 +62,16 @@ artifact for takedown articles). The Trending page's temporary check now
 runs the full pipeline — raw API response → normalize → `ContentCard` —
 proving all three adapters produce genuinely renderable, unified data.
 
+**Update:** mock social data was replaced with Reddit's public JSON API
+(no auth needed) — `app/api/social/route.ts` proxies `reddit.com/r/<sub>/hot.json`
+server-side (Reddit requires a descriptive User-Agent, set there),
+`services/socialApi.ts` now calls that real endpoint, `normalizeSocial()`
+maps real Reddit post fields (title, author, subreddit, preview image,
+permalink) instead of hardcoded mock data. `services/socialApi.ts`'s
+`SocialPost` type and `lib/sample-content.ts`'s hand-written mock posts are
+gone from the social pipeline (sample-content.ts itself still backs the
+Dashboard's demo cards until Phase 8).
+
 ---
 
 ## Not yet built (upcoming phases)

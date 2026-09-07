@@ -1,7 +1,7 @@
 import type { ContentItem } from "@/types/content";
 import type { NewsApiArticle } from "@/services/newsApi";
 import type { TmdbMovie } from "@/services/tmdbApi";
-import type { SocialPost } from "@/services/socialApi";
+import type { RedditPost } from "@/services/socialApi";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
 
@@ -45,21 +45,31 @@ export function normalizeMovie(
   }));
 }
 
-export function normalizeSocial(posts: SocialPost[]): ContentItem[] {
-  return posts.map((post) => ({
-    id: post.id,
-    type: "social",
-    title:
-      post.content.length > 60 ? `${post.content.slice(0, 60)}…` : post.content,
-    description: post.content,
-    image: post.image,
-    author: post.author,
-    source: post.handle,
-    // Mock data has no real destination — "#" avoids a dead-link click to a
-    // domain that was never meant to resolve.
-    url: "#",
-    actionLabel: "View Post",
-    publishedAt: post.postedAt,
-    tags: post.tags,
-  }));
+export function normalizeSocial(posts: RedditPost[]): ContentItem[] {
+  return posts.map((post) => {
+    // Reddit escapes "&" as "&amp;" in preview URLs.
+    const previewImage = post.preview?.images?.[0]?.source?.url?.replace(
+      /&amp;/g,
+      "&",
+    );
+    const thumbnail = post.thumbnail?.startsWith("http")
+      ? post.thumbnail
+      : undefined;
+
+    return {
+      id: post.id,
+      type: "social",
+      title: post.title,
+      description: post.selftext
+        ? post.selftext.slice(0, 200)
+        : "View the discussion on Reddit.",
+      image: previewImage ?? thumbnail,
+      author: `u/${post.author}`,
+      source: `r/${post.subreddit}`,
+      url: `https://www.reddit.com${post.permalink}`,
+      actionLabel: "View Post",
+      publishedAt: new Date(post.created_utc * 1000).toISOString(),
+      tags: [post.subreddit],
+    };
+  });
 }
