@@ -72,6 +72,15 @@ permalink) instead of hardcoded mock data. `services/socialApi.ts`'s
 gone from the social pipeline (sample-content.ts itself still backs the
 Dashboard's demo cards until Phase 8).
 
+**Update 2:** the unauthenticated Reddit JSON endpoints started returning
+403s in practice (Reddit's bot detection blocks non-browser requests to
+`*.json` inconsistently). Migrated `app/api/social/route.ts` to Reddit's
+official OAuth client-credentials flow instead — fetches and caches a
+bearer token server-side (`REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`,
+requires a free Reddit "script" app, see README), then calls
+`oauth.reddit.com` instead of the public JSON mirror. More reliable than
+the unauthenticated route.
+
 ---
 
 ## Not yet built (upcoming phases)
