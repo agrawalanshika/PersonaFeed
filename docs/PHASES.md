@@ -98,22 +98,45 @@ search UX.
 ## Phase 8 — Personalized Feed Engine ✅
 `lib/feed.ts` — `getFeedCategories()`/`getFeedGenres()` (fall back to a
 sensible default before the user picks anything in Settings) and
-`mergeFeedItems()` (dedupes by id, sorts newest-first by `publishedAt`).
-`hooks/useFeed.ts` — the actual engine: for each selected interest, fires
-one News API call and one Mastodon call; for each selected movie genre,
-one TMDB call (genre names mapped to TMDB's numeric IDs via
-`MOVIE_GENRE_TMDB_IDS`); all three run in parallel via RTK Query's
-`initiate()`/`unwrap()` (needed since the number of queries is dynamic —
-a fixed number of React hooks can't represent "one call per selected
-interest"). Results are normalized, merged, and stored in `feedSlice`.
-Dashboard page now renders the real feed with loading/error/empty states
-instead of hardcoded data — `lib/sample-content.ts` is deleted.
+`mergeFeedItems()` (dedupes by id). `hooks/useFeed.ts` — the actual engine:
+for each selected interest, fires one News API call and one Mastodon call;
+for each selected movie genre, one TMDB call (genre names mapped to TMDB's
+numeric IDs via `MOVIE_GENRE_TMDB_IDS`); all three run in parallel via RTK
+Query's `initiate()`/`unwrap()` (needed since the number of queries is
+dynamic — a fixed number of React hooks can't represent "one call per
+selected interest"). Results are normalized, merged, and stored in
+`feedSlice`. Dashboard page now renders the real feed with loading/error/
+empty states instead of hardcoded data — `lib/sample-content.ts` is deleted.
+
+**Updates (post-Phase-8 refinement, driven by user testing):**
+- Movie card images switched from TMDB's portrait `poster_path` to the
+  landscape `backdrop_path` — matches the aspect of news/social cards, so
+  nothing gets cropped or letterboxed.
+- `normalizeSocial()` also checks Mastodon's link-preview `card.image`
+  (present on most link-share posts) before falling back to a placeholder,
+  since most posts have no directly attached photo.
+- `ContentCard` now has an `onError` handler on its `<img>` — a real image
+  URL that fails to actually load (e.g. hotlink-blocked) falls back to the
+  placeholder instead of showing a broken-image icon.
+- `mergeFeedItems()` evolved through three iterations: plain chronological
+  sort (clustered by source — News/TMDB/Mastodon have very different
+  recency scales) → fixed round-robin interleave (too predictable) →
+  final **wave-based** approach: rank each type newest-first internally,
+  group same-rank items across types into a "wave," shuffle only within
+  each wave, concatenate waves in order. Recent content surfaces near the
+  top; type order within any wave is randomized rather than fixed.
+
+## Phase 9 — Interactive Content Cards ✅
+Audited against the spec (image, title, description, source, metadata,
+type-specific CTA, favorite button) — **already fully satisfied** by work
+done in Phases 3, 4, and 8: `ContentCard` has all of the above, the
+favorite button dispatches real Redux state, and CTAs are already
+type-specific ("Read More" / "View Movie" / "View Post"). No new code
+needed — this phase was completed incrementally rather than as one block.
 
 ---
 
 ## Not yet built (upcoming phases)
-9. Interactive content cards (favorite/CTA fully wired to real data — mostly already true from Phase 4/8, this phase is about polish/completeness)
-9. Interactive content cards (favorite/CTA fully wired to real data)
 10. Favorites (persisted, dedicated view)
 11. Trending
 12. Global search + debouncing
