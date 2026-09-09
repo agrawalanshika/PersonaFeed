@@ -21,9 +21,13 @@ export default function ContentCard({
 
   return (
     <article className="flex flex-col overflow-hidden rounded-md border border-border bg-surface">
-      <div className="relative aspect-video bg-background">
+      <div className="relative flex h-56 items-center justify-center bg-background">
         {/* eslint-disable-next-line @next/next/no-img-element -- external, unpredictable-domain content images */}
-        <img src={imageSrc} alt="" className="h-full w-full object-cover" />
+        <img
+          src={imageSrc}
+          alt=""
+          className="h-full w-full object-contain"
+        />
 
         <button
           type="button"
