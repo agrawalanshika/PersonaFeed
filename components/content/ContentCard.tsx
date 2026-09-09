@@ -1,14 +1,8 @@
 "use client";
 
-import { Heart, Star, Newspaper, Clapperboard, MessageCircle } from "lucide-react";
-import type { ContentItem, ContentType } from "@/types/content";
+import { Heart, Star } from "lucide-react";
+import type { ContentItem } from "@/types/content";
 import Badge from "@/components/ui/Badge";
-
-const PLACEHOLDER_ICON: Record<ContentType, typeof Newspaper> = {
-  news: Newspaper,
-  movie: Clapperboard,
-  social: MessageCircle,
-};
 
 type ContentCardProps = {
   item: ContentItem;
@@ -21,24 +15,15 @@ export default function ContentCard({
   isFavorited = false,
   onToggleFavorite,
 }: ContentCardProps) {
-  const PlaceholderIcon = PLACEHOLDER_ICON[item.type];
+  // Falls back to a placeholder image (seeded by id, so it's stable and
+  // different per card) whenever the source didn't provide a real image.
+  const imageSrc = item.image || `https://picsum.photos/seed/${item.id}/600/400`;
 
   return (
     <article className="flex flex-col overflow-hidden rounded-md border border-border bg-surface">
       <div className="relative aspect-video bg-background">
-        {item.image ? (
-          // eslint-disable-next-line @next/next/no-img-element -- external, unpredictable-domain content images
-          <img
-            src={item.image}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 bg-accent-soft/40 text-muted">
-            <PlaceholderIcon size={28} aria-hidden="true" />
-            <span className="text-xs">No image available</span>
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element -- external, unpredictable-domain content images */}
+        <img src={imageSrc} alt="" className="h-full w-full object-cover" />
 
         <button
           type="button"
