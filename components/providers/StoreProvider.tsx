@@ -5,7 +5,13 @@ import { Provider } from "react-redux";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { makeStore, type AppStore } from "@/store";
 import { setPreferences } from "@/store/slices/preferencesSlice";
-import { loadPreferences, savePreferences } from "@/lib/storage";
+import { setFavorites } from "@/store/slices/favoritesSlice";
+import {
+  loadPreferences,
+  savePreferences,
+  loadFavorites,
+  saveFavorites,
+} from "@/lib/storage";
 
 export default function StoreProvider({
   children,
@@ -14,17 +20,24 @@ export default function StoreProvider({
 }) {
   const [store] = useState<AppStore>(() => makeStore());
 
-  // Restore preferences from localStorage once mounted (client-only — avoids
-  // touching localStorage during server rendering) and keep them in sync on
-  // every future change.
+  // Restore preferences + favorites from localStorage once mounted
+  // (client-only — avoids touching localStorage during server rendering)
+  // and keep both in sync on every future change.
   useEffect(() => {
-    const stored = loadPreferences();
-    if (stored) {
-      store.dispatch(setPreferences(stored));
+    const storedPreferences = loadPreferences();
+    if (storedPreferences) {
+      store.dispatch(setPreferences(storedPreferences));
+    }
+
+    const storedFavorites = loadFavorites();
+    if (storedFavorites) {
+      store.dispatch(setFavorites(storedFavorites));
     }
 
     const unsubscribeStorage = store.subscribe(() => {
-      savePreferences(store.getState().preferences);
+      const state = store.getState();
+      savePreferences(state.preferences);
+      saveFavorites(state.favorites.items);
     });
 
     // Enables RTK Query's refetchOnFocus/refetchOnReconnect behavior.
