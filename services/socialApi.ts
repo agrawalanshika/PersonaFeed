@@ -11,6 +11,7 @@ export interface MastodonStatus {
     display_name: string;
   };
   media_attachments: { type: string; preview_url: string; url: string }[];
+  card: { image: string | null } | null;
   tags: { name: string }[];
 }
 

@@ -63,7 +63,10 @@ function stripHtml(html: string): string {
 export function normalizeSocial(posts: MastodonStatus[]): ContentItem[] {
   return posts.map((post) => {
     const text = stripHtml(post.content) || "View this post on Mastodon.";
-    const image = post.media_attachments?.[0]?.preview_url;
+    // Prefer a directly attached photo; many posts are link-shares with no
+    // attachment but a real scraped preview image on the link card instead.
+    const image =
+      post.media_attachments?.[0]?.preview_url ?? post.card?.image ?? undefined;
 
     return {
       id: post.id,
