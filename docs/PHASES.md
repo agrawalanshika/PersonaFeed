@@ -145,10 +145,23 @@ with nothing saved just don't render), shows a real empty state only when
 there are zero favorites total, and lets you unfavorite directly from
 this page (same `toggleFavorite` dispatch used everywhere else).
 
+## Phase 11 — Trending ✅
+`/trending` is now real, not placeholder boxes. `components/content/TrendingSection.tsx`
+handles loading/error/empty/grid per section, used three times. Data
+sources: News API's top-headlines with no category filter (broadest
+"what's happening" rather than interest-scoped), TMDB's existing
+`trending/movie/week` (was already a genuine trending endpoint, no change
+needed), and — new — Mastodon's real public `/api/v1/trends/statuses`
+endpoint instead of the hashtag-timeline approach used for personalization
+(`app/api/social/route.ts` now branches: category given → hashtag
+timeline for personalization, no category → genuine trends for this
+page). Favoriting works the same way here as everywhere else. The
+temporary `ApiConnectivityCheck` component (Phase 6-7's proof-of-concept)
+is deleted.
+
 ---
 
 ## Not yet built (upcoming phases)
-11. Trending
 12. Global search + debouncing
 13. Pagination / infinite scroll
 14. Drag-and-drop feed ordering
