@@ -134,10 +134,20 @@ favorite button dispatches real Redux state, and CTAs are already
 type-specific ("Read More" / "View Movie" / "View Post"). No new code
 needed — this phase was completed incrementally rather than as one block.
 
+## Phase 10 — Favorites ✅
+`lib/storage.ts` gained `loadFavorites()`/`saveFavorites()` (same pattern
+as Phase 5's preferences persistence). `favoritesSlice` gained a
+`setFavorites` reducer for hydration. `StoreProvider` now restores
+favorites from localStorage on mount and persists them on every change,
+alongside preferences. `/favorites` is a real page now — no longer a
+static empty state: groups saved items by News/Movies/Social (sections
+with nothing saved just don't render), shows a real empty state only when
+there are zero favorites total, and lets you unfavorite directly from
+this page (same `toggleFavorite` dispatch used everywhere else).
+
 ---
 
 ## Not yet built (upcoming phases)
-10. Favorites (persisted, dedicated view)
 11. Trending
 12. Global search + debouncing
 13. Pagination / infinite scroll
