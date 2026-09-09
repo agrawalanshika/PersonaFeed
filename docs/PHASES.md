@@ -95,10 +95,24 @@ as a hashtag lookup (Mastodon's public API has no unauthenticated
 full-text search) — a reasonable placeholder until Phase 12 builds real
 search UX.
 
+## Phase 8 — Personalized Feed Engine ✅
+`lib/feed.ts` — `getFeedCategories()`/`getFeedGenres()` (fall back to a
+sensible default before the user picks anything in Settings) and
+`mergeFeedItems()` (dedupes by id, sorts newest-first by `publishedAt`).
+`hooks/useFeed.ts` — the actual engine: for each selected interest, fires
+one News API call and one Mastodon call; for each selected movie genre,
+one TMDB call (genre names mapped to TMDB's numeric IDs via
+`MOVIE_GENRE_TMDB_IDS`); all three run in parallel via RTK Query's
+`initiate()`/`unwrap()` (needed since the number of queries is dynamic —
+a fixed number of React hooks can't represent "one call per selected
+interest"). Results are normalized, merged, and stored in `feedSlice`.
+Dashboard page now renders the real feed with loading/error/empty states
+instead of hardcoded data — `lib/sample-content.ts` is deleted.
+
 ---
 
 ## Not yet built (upcoming phases)
-8. Personalized feed engine (replaces `lib/sample-content.ts`, uses `normalize*()` + preferences)
+9. Interactive content cards (favorite/CTA fully wired to real data — mostly already true from Phase 4/8, this phase is about polish/completeness)
 9. Interactive content cards (favorite/CTA fully wired to real data)
 10. Favorites (persisted, dedicated view)
 11. Trending
