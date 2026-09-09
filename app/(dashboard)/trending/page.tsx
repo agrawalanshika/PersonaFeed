@@ -1,32 +1,63 @@
-import ApiConnectivityCheck from "@/components/content/ApiConnectivityCheck";
+"use client";
 
-const SECTIONS = [
-  { label: "Trending news", detail: "Top stories across your interests" },
-  { label: "Trending movies", detail: "Popular titles on TMDB right now" },
-  { label: "Trending social posts", detail: "What's getting attention today" },
-];
+import TrendingSection from "@/components/content/TrendingSection";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { toggleFavorite } from "@/store/slices/favoritesSlice";
+import { useGetTopHeadlinesQuery } from "@/services/newsApi";
+import { useGetTrendingMoviesQuery } from "@/services/tmdbApi";
+import { useGetTrendingSocialPostsQuery } from "@/services/socialApi";
+import { normalizeNews, normalizeMovie, normalizeSocial } from "@/lib/normalize";
+import type { ContentItem } from "@/types/content";
 
 export default function TrendingPage() {
+  const dispatch = useAppDispatch();
+  const favoriteIds = useAppSelector(
+    (state) => new Set(state.favorites.items.map((item) => item.id)),
+  );
+
+  const news = useGetTopHeadlinesQuery();
+  const movies = useGetTrendingMoviesQuery();
+  const social = useGetTrendingSocialPostsQuery();
+
+  const handleToggleFavorite = (item: ContentItem) =>
+    dispatch(toggleFavorite(item));
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <p className="max-w-2xl text-sm text-muted">
-        Real trending data from News API, TMDB, and mock social content is
-        wired up in Phase 11. These sections mark where each will live.
+        What&apos;s trending right now across news, movies, and social —
+        independent of your personal interests in Settings.
       </p>
 
-      <div className="flex flex-col gap-4">
-        {SECTIONS.map((section) => (
-          <div
-            key={section.label}
-            className="rounded-md border border-border bg-surface p-4"
-          >
-            <h2 className="text-sm font-semibold">{section.label}</h2>
-            <p className="mt-1 text-sm text-muted">{section.detail}</p>
-          </div>
-        ))}
-      </div>
+      <TrendingSection
+        title="Trending news"
+        isLoading={news.isLoading}
+        error={news.error}
+        items={news.data ? normalizeNews(news.data.articles) : []}
+        onRetry={news.refetch}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={handleToggleFavorite}
+      />
 
-      <ApiConnectivityCheck />
+      <TrendingSection
+        title="Trending movies"
+        isLoading={movies.isLoading}
+        error={movies.error}
+        items={movies.data ? normalizeMovie(movies.data.results) : []}
+        onRetry={movies.refetch}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={handleToggleFavorite}
+      />
+
+      <TrendingSection
+        title="Trending social posts"
+        isLoading={social.isLoading}
+        error={social.error}
+        items={social.data ? normalizeSocial(social.data) : []}
+        onRetry={social.refetch}
+        favoriteIds={favoriteIds}
+        onToggleFavorite={handleToggleFavorite}
+      />
     </div>
   );
 }

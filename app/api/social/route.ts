@@ -24,14 +24,23 @@ export async function GET(request: NextRequest) {
   const limit = searchParams.get("limit") ?? "10";
 
   const isSearch = type === "search";
-  // Mastodon's public API has no unauthenticated full-text search, so
-  // "search" here treats the query as a hashtag — a reasonable stand-in
-  // until Phase 12 builds full search UX.
-  const tag = isSearch
-    ? sanitizeTag(query || "")
-    : (category && CATEGORY_TAGS[category]) || "technology";
 
-  const upstream = new URL(`${MASTODON_BASE}/timelines/tag/${tag}`);
+  let upstream: URL;
+  if (isSearch) {
+    // Mastodon's public API has no unauthenticated full-text search, so
+    // "search" here treats the query as a hashtag — a reasonable stand-in
+    // until Phase 12 builds full search UX.
+    const tag = sanitizeTag(query || "");
+    upstream = new URL(`${MASTODON_BASE}/timelines/tag/${tag}`);
+  } else if (category && CATEGORY_TAGS[category]) {
+    // Personalized feed use case: a specific interest was selected.
+    upstream = new URL(`${MASTODON_BASE}/timelines/tag/${CATEGORY_TAGS[category]}`);
+  } else {
+    // No category = genuine trending, used by the Trending page — Mastodon's
+    // real public trends endpoint, not a hashtag guess.
+    upstream = new URL(`${MASTODON_BASE}/trends/statuses`);
+  }
+
   upstream.searchParams.set("limit", limit);
 
   try {
