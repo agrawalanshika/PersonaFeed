@@ -14,10 +14,16 @@ export function getFeedGenres(moviePreferences: string[]): string[] {
 }
 
 /**
- * Dedupes by id, then shuffles so the feed doesn't cluster or follow a
- * fixed repeating pattern by source type. Order will differ each time the
- * feed reloads or preferences change — Phase 14's drag-and-drop lets users
- * lock in a custom order on top of this.
+ * Dedupes by id, then combines recency with topic mixing:
+ *   1. Rank each type's items newest-first internally (comparing timestamps
+ *      *within* a type only — a movie's release date and a social post's
+ *      timestamp aren't on the same scale, so cross-type comparison isn't
+ *      meaningful).
+ *   2. Group same-rank items across types into a "wave" (the most-recent
+ *      news + most-recent social + most-recent movie form wave 0, etc).
+ *   3. Shuffle only within each wave, then concatenate waves in order.
+ * Net effect: recent items surface near the top, but which type leads
+ * within any given wave is randomized instead of a fixed pattern.
  */
 export function mergeFeedItems(items: ContentItem[]): ContentItem[] {
   const seen = new Set<string>();
@@ -29,7 +35,30 @@ export function mergeFeedItems(items: ContentItem[]): ContentItem[] {
     deduped.push(item);
   }
 
-  return shuffle(deduped);
+  const byRecency = (a: ContentItem, b: ContentItem) => {
+    const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+    const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+    return bTime - aTime;
+  };
+
+  const news = deduped.filter((item) => item.type === "news").sort(byRecency);
+  const social = deduped
+    .filter((item) => item.type === "social")
+    .sort(byRecency);
+  const movie = deduped
+    .filter((item) => item.type === "movie")
+    .sort(byRecency);
+
+  const merged: ContentItem[] = [];
+  const waveCount = Math.max(news.length, social.length, movie.length);
+  for (let i = 0; i < waveCount; i++) {
+    const wave = [news[i], social[i], movie[i]].filter(
+      (item): item is ContentItem => Boolean(item),
+    );
+    merged.push(...shuffle(wave));
+  }
+
+  return merged;
 }
 
 /** Fisher-Yates shuffle — unbiased, doesn't mutate the input array. */
