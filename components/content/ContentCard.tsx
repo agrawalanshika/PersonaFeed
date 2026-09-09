@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Heart, Star } from "lucide-react";
 import type { ContentItem } from "@/types/content";
 import Badge from "@/components/ui/Badge";
@@ -15,15 +16,23 @@ export default function ContentCard({
   isFavorited = false,
   onToggleFavorite,
 }: ContentCardProps) {
-  // Falls back to a placeholder image (seeded by id, so it's stable and
-  // different per card) whenever the source didn't provide a real image.
-  const imageSrc = item.image || `https://picsum.photos/seed/${item.id}/600/400`;
+  // Placeholder is seeded by id, so it's stable and different per card.
+  const fallbackSrc = `https://picsum.photos/seed/${item.id}/600/400`;
+  // Tracked in state (not just item.image || fallback) so a real URL that
+  // *fails to load* — e.g. a news site blocking hotlinking — still falls
+  // back to the placeholder instead of showing a broken-image icon.
+  const [imgSrc, setImgSrc] = useState(item.image || fallbackSrc);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-md border border-border bg-surface">
       <div className="relative h-48 bg-background">
         {/* eslint-disable-next-line @next/next/no-img-element -- external, unpredictable-domain content images */}
-        <img src={imageSrc} alt="" className="h-full w-full object-cover" />
+        <img
+          src={imgSrc}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setImgSrc(fallbackSrc)}
+        />
 
         <button
           type="button"
