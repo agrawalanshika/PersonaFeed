@@ -4,7 +4,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import ContentCard from "@/components/content/ContentCard";
 import type { ContentItem } from "@/types/content";
 
-type TrendingSectionProps = {
+type ContentSectionProps = {
   title: string;
   isLoading: boolean;
   error: unknown;
@@ -12,9 +12,11 @@ type TrendingSectionProps = {
   onRetry: () => void;
   favoriteIds: Set<string>;
   onToggleFavorite: (item: ContentItem) => void;
+  emptyTitle?: string;
+  emptyDescription?: string;
 };
 
-export default function TrendingSection({
+export default function ContentSection({
   title,
   isLoading,
   error,
@@ -22,7 +24,9 @@ export default function TrendingSection({
   onRetry,
   favoriteIds,
   onToggleFavorite,
-}: TrendingSectionProps) {
+  emptyTitle = "Nothing here right now",
+  emptyDescription,
+}: ContentSectionProps) {
   const hasError = Boolean(error);
 
   return (
@@ -40,7 +44,7 @@ export default function TrendingSection({
       )}
 
       {!isLoading && !hasError && items.length === 0 && (
-        <EmptyState title="Nothing trending right now" />
+        <EmptyState title={emptyTitle} description={emptyDescription} />
       )}
 
       {!isLoading && !hasError && items.length > 0 && (

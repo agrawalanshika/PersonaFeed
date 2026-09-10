@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Menu, Search, Settings } from "lucide-react";
 
 type HeaderProps = {
@@ -23,10 +24,13 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
         {title}
       </h1>
 
-      <div className="hidden items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-muted sm:flex">
+      <Link
+        href="/search"
+        className="hidden items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-muted transition-colors hover:bg-accent-soft/40 sm:flex"
+      >
         <Search size={16} aria-hidden="true" />
-        <span>Search coming in Phase 12</span>
-      </div>
+        <span>Search...</span>
+      </Link>
 
       <button
         type="button"

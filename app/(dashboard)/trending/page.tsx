@@ -1,6 +1,6 @@
 "use client";
 
-import TrendingSection from "@/components/content/TrendingSection";
+import ContentSection from "@/components/content/ContentSection";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
 import { useGetTopHeadlinesQuery } from "@/services/newsApi";
@@ -29,7 +29,7 @@ export default function TrendingPage() {
         independent of your personal interests in Settings.
       </p>
 
-      <TrendingSection
+      <ContentSection
         title="Trending news"
         isLoading={news.isLoading}
         error={news.error}
@@ -39,7 +39,7 @@ export default function TrendingPage() {
         onToggleFavorite={handleToggleFavorite}
       />
 
-      <TrendingSection
+      <ContentSection
         title="Trending movies"
         isLoading={movies.isLoading}
         error={movies.error}
@@ -49,7 +49,7 @@ export default function TrendingPage() {
         onToggleFavorite={handleToggleFavorite}
       />
 
-      <TrendingSection
+      <ContentSection
         title="Trending social posts"
         isLoading={social.isLoading}
         error={social.error}
