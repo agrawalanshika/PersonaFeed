@@ -159,10 +159,25 @@ page). Favoriting works the same way here as everywhere else. The
 temporary `ApiConnectivityCheck` component (Phase 6-7's proof-of-concept)
 is deleted.
 
+## Phase 12 — Global Search + Debouncing ✅
+`/search` is real: a controlled input debounced 400ms via the new
+`hooks/useDebouncedValue.ts`, filter tabs (All/News/Movies/Social), and
+searches News API + TMDB + Mastodon in parallel — each skipped via RTK
+Query's `skip` option when its filter isn't active, so switching to the
+"News" tab doesn't keep firing movie/social requests on every keystroke.
+Proper states: initial "start typing" prompt, loading spinner, error with
+retry, and a real "no results found" (distinct from the initial-empty
+case). Header's search box is now a working link to this page instead of
+a "coming soon" placeholder.
+
+**Note:** `TrendingSection` (Phase 11) was generalized and renamed to
+`ContentSection` (added `emptyTitle`/`emptyDescription` props) so both
+Trending and Search reuse the same section component instead of two
+near-duplicates.
+
 ---
 
 ## Not yet built (upcoming phases)
-12. Global search + debouncing
 13. Pagination / infinite scroll
 14. Drag-and-drop feed ordering
 15. Dark mode (explicit toggle + persistence)
