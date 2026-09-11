@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") ?? "trending";
   const category = searchParams.get("category")?.toLowerCase();
   const query = searchParams.get("q");
-  const limit = searchParams.get("limit") ?? "10";
+  const limit = searchParams.get("limit") ?? "20";
 
   const isSearch = type === "search";
 

@@ -23,6 +23,21 @@ export default function DashboardPage() {
     PAGE_SIZE,
   );
 
+  // Two-tier pagination: first reveal more of what's already fetched
+  // (instant, no network call); once that's exhausted, actually fetch the
+  // next page from News API/TMDB and reveal that too — genuine infinite
+  // scroll rather than paginating through one fixed batch.
+  const handleLoadMore = async () => {
+    if (hasMore) {
+      loadMore();
+      return;
+    }
+    if (feed.canLoadMore) {
+      await feed.loadMoreFeed();
+      loadMore();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <p className="max-w-2xl text-sm text-muted">
@@ -61,8 +76,9 @@ export default function DashboardPage() {
             ))}
           </div>
           <PaginationFooter
-            hasMore={hasMore}
-            onLoadMore={loadMore}
+            hasMore={hasMore || feed.canLoadMore}
+            onLoadMore={handleLoadMore}
+            isLoadingMore={feed.isLoadingMore}
             showEndNote={feed.items.length > PAGE_SIZE}
           />
         </>

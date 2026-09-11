@@ -28,6 +28,17 @@ const feedSlice = createSlice({
     setFeedOrder(state, action: PayloadAction<string[]>) {
       state.order = action.payload;
     },
+    /** Appends newly-fetched items (e.g. next page) without disturbing the
+     * existing order — used by infinite scroll once the initial batch is
+     * exhausted, as opposed to setFeedItems which replaces everything. */
+    appendFeedItems(state, action: PayloadAction<ContentItem[]>) {
+      const existingIds = new Set(state.items.map((item) => item.id));
+      const newItems = action.payload.filter(
+        (item) => !existingIds.has(item.id),
+      );
+      state.items = [...state.items, ...newItems];
+      state.order = state.items.map((item) => item.id);
+    },
     setFeedStatus(state, action: PayloadAction<FeedStatus>) {
       state.status = action.payload;
     },
@@ -37,6 +48,11 @@ const feedSlice = createSlice({
   },
 });
 
-export const { setFeedItems, setFeedOrder, setFeedStatus, setFeedError } =
-  feedSlice.actions;
+export const {
+  setFeedItems,
+  setFeedOrder,
+  setFeedStatus,
+  setFeedError,
+  appendFeedItems,
+} = feedSlice.actions;
 export default feedSlice.reducer;
