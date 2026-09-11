@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Search as SearchIcon } from "lucide-react";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import ContentCard from "@/components/content/ContentCard";
+import PaginationFooter from "@/components/content/PaginationFooter";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { usePaginatedItems } from "@/hooks/usePaginatedItems";
 import { useSearchNewsQuery } from "@/services/newsApi";
 import { useSearchMoviesQuery } from "@/services/tmdbApi";
 import { useSearchSocialPostsQuery } from "@/services/socialApi";
 import { normalizeNews, normalizeMovie, normalizeSocial } from "@/lib/normalize";
 import type { ContentType } from "@/types/content";
+
+const PAGE_SIZE = 9;
 
 type Filter = "all" | ContentType;
 
@@ -61,11 +65,18 @@ export default function SearchPage() {
     (wantsMovies && Boolean(movies.error)) ||
     (wantsSocial && Boolean(social.error));
 
-  const results = [
-    ...(wantsNews && news.data ? normalizeNews(news.data.articles) : []),
-    ...(wantsMovies && movies.data ? normalizeMovie(movies.data.results) : []),
-    ...(wantsSocial && social.data ? normalizeSocial(social.data) : []),
-  ];
+  const results = useMemo(
+    () => [
+      ...(wantsNews && news.data ? normalizeNews(news.data.articles) : []),
+      ...(wantsMovies && movies.data ? normalizeMovie(movies.data.results) : []),
+      ...(wantsSocial && social.data ? normalizeSocial(social.data) : []),
+    ],
+    [wantsNews, news.data, wantsMovies, movies.data, wantsSocial, social.data],
+  );
+  const { visibleItems, hasMore, loadMore } = usePaginatedItems(
+    results,
+    PAGE_SIZE,
+  );
 
   const handleRetry = () => {
     if (wantsNews) news.refetch();
@@ -135,16 +146,23 @@ export default function SearchPage() {
       )}
 
       {hasQuery && !isLoading && !hasError && results.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {results.map((item) => (
-            <ContentCard
-              key={item.id}
-              item={item}
-              isFavorited={favoriteIds.has(item.id)}
-              onToggleFavorite={() => dispatch(toggleFavorite(item))}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleItems.map((item) => (
+              <ContentCard
+                key={item.id}
+                item={item}
+                isFavorited={favoriteIds.has(item.id)}
+                onToggleFavorite={() => dispatch(toggleFavorite(item))}
+              />
+            ))}
+          </div>
+          <PaginationFooter
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            showEndNote={results.length > PAGE_SIZE}
+          />
+        </>
       )}
     </div>
   );

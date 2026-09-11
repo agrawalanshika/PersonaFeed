@@ -1,12 +1,16 @@
 "use client";
 
 import ContentCard from "@/components/content/ContentCard";
+import PaginationFooter from "@/components/content/PaginationFooter";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
 import { useFeed } from "@/hooks/useFeed";
+import { usePaginatedItems } from "@/hooks/usePaginatedItems";
+
+const PAGE_SIZE = 9;
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -14,6 +18,10 @@ export default function DashboardPage() {
     new Set(state.favorites.items.map((item) => item.id)),
   );
   const feed = useFeed();
+  const { visibleItems, hasMore, loadMore } = usePaginatedItems(
+    feed.items,
+    PAGE_SIZE,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,16 +49,23 @@ export default function DashboardPage() {
       )}
 
       {feed.status === "succeeded" && feed.items.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {feed.items.map((item) => (
-            <ContentCard
-              key={item.id}
-              item={item}
-              isFavorited={favoriteIds.has(item.id)}
-              onToggleFavorite={() => dispatch(toggleFavorite(item))}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleItems.map((item) => (
+              <ContentCard
+                key={item.id}
+                item={item}
+                isFavorited={favoriteIds.has(item.id)}
+                onToggleFavorite={() => dispatch(toggleFavorite(item))}
+              />
+            ))}
+          </div>
+          <PaginationFooter
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            showEndNote={feed.items.length > PAGE_SIZE}
+          />
+        </>
       )}
     </div>
   );
