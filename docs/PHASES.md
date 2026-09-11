@@ -175,10 +175,26 @@ a "coming soon" placeholder.
 Trending and Search reuse the same section component instead of two
 near-duplicates.
 
+## Phase 13 — Pagination / Infinite Scroll ✅
+`hooks/usePaginatedItems.ts` reveals items 9 at a time instead of
+rendering the full list at once, and resets to page 1 whenever the
+underlying item list actually changes (new preferences, new search) — the
+reset happens during render per React's documented pattern for "adjusting
+state when a prop changes," not inside an effect. `LoadMoreSentinel` is an
+invisible element using `IntersectionObserver` that triggers loading the
+next page as it scrolls into view; `PaginationFooter` pairs that with a
+manual "Load more" button (keyboard/no-scroll-friendly) and a "You've
+reached the end" note once exhausted. Wired into both Dashboard and
+Search. **Design note:** this is client-side reveal pagination over
+already-fetched data, not incremental API calls per page — the feed
+engine already fetches everything for the selected preferences up front,
+so paginating the render avoids extra network requests rather than adding
+them, while still solving the actual UX problem (not rendering huge
+datasets at once).
+
 ---
 
 ## Not yet built (upcoming phases)
-13. Pagination / infinite scroll
 14. Drag-and-drop feed ordering
 15. Dark mode (explicit toggle + persistence)
 16. Animations & micro-interactions
