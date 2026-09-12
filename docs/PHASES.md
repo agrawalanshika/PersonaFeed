@@ -192,6 +192,21 @@ so paginating the render avoids extra network requests rather than adding
 them, while still solving the actual UX problem (not rendering huge
 datasets at once).
 
+**Update:** the first version only paginated through one already-fetched
+batch — hitting "the end" meant there genuinely was no more data in
+memory, not that the source had run out. Upgraded to real infinite
+scroll for the Dashboard: `useFeed` now tracks a page number per selected
+category/genre and, once the local buffer is exhausted, actually fetches
+the *next page* from News API and TMDB (both support real pagination) via
+a new `loadMoreFeed()`, appending through `appendFeedItems` (dedupes
+against what's already loaded). `PaginationFooter` shows a genuine
+"Loading more..." state while that fetch is in flight. Mastodon's public
+API has no page-number pagination for hashtag timelines, so social
+content is still a one-time pull per load — bumped its default pool size
+(10→20) to partly compensate; this is a documented limitation, not an
+oversight. Search still uses one-shot local pagination only (not yet
+upgraded to real network paging).
+
 ---
 
 ## Not yet built (upcoming phases)
