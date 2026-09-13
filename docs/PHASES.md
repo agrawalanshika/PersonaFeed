@@ -207,10 +207,24 @@ content is still a one-time pull per load — bumped its default pool size
 oversight. Search still uses one-shot local pagination only (not yet
 upgraded to real network paging).
 
+## Phase 14 — Drag-and-Drop Feed Ordering ✅
+`components/content/SortableContentGrid.tsx` (dnd-kit's `DndContext` +
+`SortableContext`, pointer sensor with a 5px activation threshold so a
+plain click on the favorite heart or CTA button still works instead of
+being swallowed as a drag, plus a keyboard sensor for accessibility) lets
+you drag any Dashboard card to reorder the feed. `lib/storage.ts` gained
+`loadFeedOrder()`/`saveFeedOrder()` — persisting only the array of ids
+(not full item snapshots), since feed content is live and gets refetched,
+not a fixed personal list like Favorites. `lib/feed.ts`'s new
+`applySavedOrder()` reapplies that saved sequence over freshly-fetched
+items on the next load (items matching a saved id keep their position;
+anything new — likely, since news/social content changes — gets appended
+after). Reordering is scoped to Dashboard only, not Trending/Search,
+since those are transient result lists rather than "your feed."
+
 ---
 
 ## Not yet built (upcoming phases)
-14. Drag-and-drop feed ordering
 15. Dark mode (explicit toggle + persistence)
 16. Animations & micro-interactions
 17. Loading/error/empty states audit
