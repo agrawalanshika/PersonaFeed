@@ -1,14 +1,17 @@
 "use client";
 
-import ContentCard from "@/components/content/ContentCard";
+import SortableContentGrid from "@/components/content/SortableContentGrid";
 import PaginationFooter from "@/components/content/PaginationFooter";
 import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
+import { setFeedItems } from "@/store/slices/feedSlice";
 import { useFeed } from "@/hooks/useFeed";
 import { usePaginatedItems } from "@/hooks/usePaginatedItems";
+import { saveFeedOrder } from "@/lib/storage";
+import type { ContentItem } from "@/types/content";
 
 const PAGE_SIZE = 9;
 
@@ -38,12 +41,23 @@ export default function DashboardPage() {
     }
   };
 
+  // Drag-and-drop only reorders what's currently visible/paginated — the
+  // reordered slice gets spliced back in front of whatever hasn't been
+  // revealed yet, and the full resulting order is persisted.
+  const handleReorder = (reorderedVisible: ContentItem[]) => {
+    const rest = feed.items.slice(visibleItems.length);
+    const newItems = [...reorderedVisible, ...rest];
+    dispatch(setFeedItems(newItems));
+    saveFeedOrder(newItems.map((item) => item.id));
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <p className="max-w-2xl text-sm text-muted">
         Your personalized feed, built from the interests and movie genres you
         picked in Settings. Nothing selected yet? You&apos;re seeing a sensible
-        default until you do.
+        default until you do. Drag any card to reorder your feed —
+        it&apos;ll stick around next time you visit.
       </p>
 
       {feed.status === "loading" && (
@@ -65,16 +79,12 @@ export default function DashboardPage() {
 
       {feed.status === "succeeded" && feed.items.length > 0 && (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleItems.map((item) => (
-              <ContentCard
-                key={item.id}
-                item={item}
-                isFavorited={favoriteIds.has(item.id)}
-                onToggleFavorite={() => dispatch(toggleFavorite(item))}
-              />
-            ))}
-          </div>
+          <SortableContentGrid
+            items={visibleItems}
+            favoriteIds={favoriteIds}
+            onToggleFavorite={(item) => dispatch(toggleFavorite(item))}
+            onReorder={handleReorder}
+          />
           <PaginationFooter
             hasMore={hasMore || feed.canLoadMore}
             onLoadMore={handleLoadMore}

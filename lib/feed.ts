@@ -70,3 +70,30 @@ function shuffle<T>(array: T[]): T[] {
   }
   return result;
 }
+
+/**
+ * Applies a saved drag-and-drop order on top of freshly-fetched items.
+ * Items matching a saved id appear in that saved sequence first; anything
+ * new (not part of the saved order — likely because the feed refreshed
+ * with different live content) is appended afterward in its normal order.
+ */
+export function applySavedOrder(
+  items: ContentItem[],
+  savedOrder: string[] | null,
+): ContentItem[] {
+  if (!savedOrder || savedOrder.length === 0) return items;
+
+  const remaining = new Map(items.map((item) => [item.id, item]));
+  const ordered: ContentItem[] = [];
+
+  for (const id of savedOrder) {
+    const item = remaining.get(id);
+    if (item) {
+      ordered.push(item);
+      remaining.delete(id);
+    }
+  }
+
+  ordered.push(...remaining.values());
+  return ordered;
+}

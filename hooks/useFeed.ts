@@ -6,8 +6,9 @@ import { newsApi } from "@/services/newsApi";
 import { tmdbApi } from "@/services/tmdbApi";
 import { socialApi } from "@/services/socialApi";
 import { normalizeNews, normalizeMovie, normalizeSocial } from "@/lib/normalize";
-import { getFeedCategories, getFeedGenres, mergeFeedItems } from "@/lib/feed";
+import { getFeedCategories, getFeedGenres, mergeFeedItems, applySavedOrder } from "@/lib/feed";
 import { MOVIE_GENRE_TMDB_IDS } from "@/lib/preferences-options";
+import { loadFeedOrder } from "@/lib/storage";
 import {
   setFeedItems,
   appendFeedItems,
@@ -18,8 +19,9 @@ import {
 /**
  * Builds the personalized feed from the user's saved preferences:
  *   preferences -> one API call per selection -> normalize -> merge/dedupe/sort
- * Result is stored in feedSlice (so Phase 14's drag-and-drop ordering has
- * something to reorder) and also returned directly for convenience.
+ * Result is stored in feedSlice, which also holds the user's drag-and-drop
+ * order (Phase 14) — any saved order is applied on top of a fresh fetch via
+ * applySavedOrder() so reordering survives a refresh where possible.
  *
  * Also exposes loadMoreFeed(): genuinely fetches the *next page* from News
  * API and TMDB (both support real pagination) and appends it — this is
@@ -121,9 +123,10 @@ export function useFeed() {
           ...movieItems,
           ...socialItems,
         ]);
+        const ordered = applySavedOrder(merged, loadFeedOrder());
 
         if (!cancelled) {
-          dispatch(setFeedItems(merged));
+          dispatch(setFeedItems(ordered));
           dispatch(setFeedStatus("succeeded"));
         }
       } catch (error) {
