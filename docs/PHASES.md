@@ -222,10 +222,24 @@ anything new — likely, since news/social content changes — gets appended
 after). Reordering is scoped to Dashboard only, not Trending/Search,
 since those are transient result lists rather than "your feed."
 
+## Phase 15 — Dark Mode ✅
+Explicit toggle + persistence, not just OS detection. `globals.css`
+switched from a `@media (prefers-color-scheme: dark)` block to a `.dark`
+class selector, so JS is now authoritative over which palette applies —
+"system" mode still respects the OS preference, just resolved in JS via
+`matchMedia` rather than pure CSS. `lib/storage.ts` gained
+`loadTheme()`/`saveTheme()`. `StoreProvider` hydrates the saved theme on
+mount, applies/removes the `.dark` class on `<html>` whenever `ui.theme`
+changes, and listens for live OS-level theme changes while "system" is
+selected. Two places to control it: a quick sun/moon/monitor icon in the
+`Header` that cycles Light → Dark → System, and a full "Appearance"
+section on the Settings page with the same three options spelled out. A
+subtle `background-color`/`color` transition was added to `body` for a
+less jarring switch (full animation polish is Phase 16).
+
 ---
 
 ## Not yet built (upcoming phases)
-15. Dark mode (explicit toggle + persistence)
 16. Animations & micro-interactions
 17. Loading/error/empty states audit
 18. Accessibility audit
