@@ -32,27 +32,26 @@
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #14151a;
-    --surface: #1c1e24;
-    --foreground: #edecea;
-    --muted: #93949c;
-    --border: #2c2e35;
-    --accent: #7b70ff;
-    --accent-foreground: #14151a;
-    --accent-soft: #262550;
-    --highlight: #e0994f;
-    --danger: #e5867f;
-    --danger-soft: #3a2325;
-    --success: #6fbf9a;
-  }
+.dark {
+  --background: #14151a;
+  --surface: #1c1e24;
+  --foreground: #edecea;
+  --muted: #93949c;
+  --border: #2c2e35;
+  --accent: #7b70ff;
+  --accent-foreground: #14151a;
+  --accent-soft: #262550;
+  --highlight: #e0994f;
+  --danger: #e5867f;
+  --danger-soft: #3a2325;
+  --success: #6fbf9a;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 *:focus-visible {

@@ -1,9 +1,11 @@
 import type { PreferencesState } from "@/store/slices/preferencesSlice";
 import type { ContentItem } from "@/types/content";
+import type { Theme } from "@/store/slices/uiSlice";
 
 const PREFERENCES_KEY = "personaFeed:preferences";
 const FAVORITES_KEY = "personaFeed:favorites";
 const FEED_ORDER_KEY = "personaFeed:feedOrder";
+const THEME_KEY = "personaFeed:theme";
 
 export function loadPreferences(): PreferencesState | null {
   if (typeof window === "undefined") return null;
@@ -72,6 +74,27 @@ export function saveFeedOrder(order: string[]): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(FEED_ORDER_KEY, JSON.stringify(order));
+  } catch {
+    // localStorage can fail (private browsing, quota) — safe to ignore
+  }
+}
+
+const VALID_THEMES: Theme[] = ["light", "dark", "system"];
+
+export function loadTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(THEME_KEY);
+    return raw && VALID_THEMES.includes(raw as Theme) ? (raw as Theme) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveTheme(theme: Theme): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(THEME_KEY, theme);
   } catch {
     // localStorage can fail (private browsing, quota) — safe to ignore
   }
