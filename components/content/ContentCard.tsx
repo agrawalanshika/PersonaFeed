@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Heart, Star } from "lucide-react";
 import type { ContentItem } from "@/types/content";
 import Badge from "@/components/ui/Badge";
@@ -9,12 +10,15 @@ type ContentCardProps = {
   item: ContentItem;
   isFavorited?: boolean;
   onToggleFavorite?: (id: string) => void;
+  /** Optional stagger index for the entrance animation (capped internally). */
+  index?: number;
 };
 
 export default function ContentCard({
   item,
   isFavorited = false,
   onToggleFavorite,
+  index = 0,
 }: ContentCardProps) {
   // Placeholder is seeded by id, so it's stable and different per card.
   const fallbackSrc = `https://picsum.photos/seed/${item.id}/600/400`;
@@ -24,7 +28,14 @@ export default function ContentCard({
   const [imgSrc, setImgSrc] = useState(item.image || fallbackSrc);
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-md border border-border bg-surface">
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, delay: Math.min(index * 0.03, 0.3) }}
+      whileHover={{ y: -3 }}
+      className="flex flex-col overflow-hidden rounded-md border border-border bg-surface shadow-sm transition-shadow hover:shadow-md"
+    >
       <div className="relative h-48 bg-background">
         {/* eslint-disable-next-line @next/next/no-img-element -- external, unpredictable-domain content images */}
         <img
@@ -34,9 +45,12 @@ export default function ContentCard({
           onError={() => setImgSrc(fallbackSrc)}
         />
 
-        <button
+        <motion.button
           type="button"
           onClick={() => onToggleFavorite?.(item.id)}
+          whileTap={{ scale: 0.8 }}
+          animate={isFavorited ? { scale: [1, 1.25, 1] } : { scale: 1 }}
+          transition={{ duration: 0.3 }}
           aria-pressed={isFavorited}
           aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
           className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-surface/90 text-muted hover:text-danger"
@@ -46,7 +60,7 @@ export default function ContentCard({
             aria-hidden="true"
             className={isFavorited ? "fill-danger text-danger" : ""}
           />
-        </button>
+        </motion.button>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
@@ -78,6 +92,6 @@ export default function ContentCard({
           {item.actionLabel}
         </a>
       </div>
-    </article>
+    </motion.article>
   );
 }

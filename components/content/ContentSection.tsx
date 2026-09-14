@@ -1,7 +1,7 @@
-import Spinner from "@/components/ui/Spinner";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import ContentCard from "@/components/content/ContentCard";
+import { SkeletonGrid } from "@/components/content/SkeletonCard";
 import type { ContentItem } from "@/types/content";
 
 type ContentSectionProps = {
@@ -33,11 +33,7 @@ export default function ContentSection({
     <div className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold">{title}</h2>
 
-      {isLoading && (
-        <div className="flex justify-center py-10">
-          <Spinner label="Loading..." />
-        </div>
-      )}
+      {isLoading && <SkeletonGrid count={3} />}
 
       {!isLoading && hasError && (
         <ErrorState message="Couldn't load this section." onRetry={onRetry} />
@@ -49,10 +45,11 @@ export default function ContentSection({
 
       {!isLoading && !hasError && items.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <ContentCard
               key={item.id}
               item={item}
+              index={index}
               isFavorited={favoriteIds.has(item.id)}
               onToggleFavorite={() => onToggleFavorite(item)}
             />

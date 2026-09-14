@@ -48,10 +48,11 @@ export default function FavoritesPage() {
           <div key={type} className="flex flex-col gap-3">
             <h2 className="text-sm font-semibold">{label}</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <ContentCard
                   key={item.id}
                   item={item}
+                  index={index}
                   isFavorited
                   onToggleFavorite={() => dispatch(toggleFavorite(item))}
                 />

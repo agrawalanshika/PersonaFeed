@@ -2,7 +2,7 @@
 
 import SortableContentGrid from "@/components/content/SortableContentGrid";
 import PaginationFooter from "@/components/content/PaginationFooter";
-import Spinner from "@/components/ui/Spinner";
+import { SkeletonGrid } from "@/components/content/SkeletonCard";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -60,11 +60,7 @@ export default function DashboardPage() {
         it&apos;ll stick around next time you visit.
       </p>
 
-      {feed.status === "loading" && (
-        <div className="flex justify-center py-16">
-          <Spinner label="Building your feed..." />
-        </div>
-      )}
+      {feed.status === "loading" && <SkeletonGrid count={6} />}
 
       {feed.status === "failed" && (
         <ErrorState message={feed.error ?? "Couldn't load your feed."} />

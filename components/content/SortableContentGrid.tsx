@@ -65,10 +65,11 @@ export default function SortableContentGrid({
         strategy={rectSortingStrategy}
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <SortableCard
               key={item.id}
               item={item}
+              index={index}
               isFavorited={favoriteIds.has(item.id)}
               onToggleFavorite={() => onToggleFavorite(item)}
             />
@@ -81,10 +82,12 @@ export default function SortableContentGrid({
 
 function SortableCard({
   item,
+  index,
   isFavorited,
   onToggleFavorite,
 }: {
   item: ContentItem;
+  index: number;
   isFavorited: boolean;
   onToggleFavorite: () => void;
 }) {
@@ -108,6 +111,7 @@ function SortableCard({
     >
       <ContentCard
         item={item}
+        index={index}
         isFavorited={isFavorited}
         onToggleFavorite={onToggleFavorite}
       />

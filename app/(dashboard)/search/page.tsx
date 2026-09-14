@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search as SearchIcon } from "lucide-react";
-import Spinner from "@/components/ui/Spinner";
+import { SkeletonGrid } from "@/components/content/SkeletonCard";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import ContentCard from "@/components/content/ContentCard";
@@ -128,11 +128,7 @@ export default function SearchPage() {
         />
       )}
 
-      {hasQuery && isLoading && (
-        <div className="flex justify-center py-16">
-          <Spinner label="Searching..." />
-        </div>
-      )}
+      {hasQuery && isLoading && <SkeletonGrid count={6} />}
 
       {hasQuery && !isLoading && hasError && (
         <ErrorState message="Something went wrong searching." onRetry={handleRetry} />
@@ -148,10 +144,11 @@ export default function SearchPage() {
       {hasQuery && !isLoading && !hasError && results.length > 0 && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleItems.map((item) => (
+            {visibleItems.map((item, index) => (
               <ContentCard
                 key={item.id}
                 item={item}
+                index={index}
                 isFavorited={favoriteIds.has(item.id)}
                 onToggleFavorite={() => dispatch(toggleFavorite(item))}
               />
