@@ -237,10 +237,32 @@ section on the Settings page with the same three options spelled out. A
 subtle `background-color`/`color` transition was added to `body` for a
 less jarring switch (full animation polish is Phase 16).
 
+## Phase 16 — Animations & Micro-interactions ✅
+Used `framer-motion` (installed since Phase 1, unused until now) across
+the spec's checklist, kept short (150-250ms) and subtle per "professional,
+not flashy":
+- **Card entrance** — `ContentCard` fades/slides in on mount, staggered
+  slightly by index so a grid feels sequential rather than popping in at
+  once (capped delay so long lists don't get sluggish).
+- **Card hover** — a small lift (`y: -3`) plus shadow on hover.
+- **Favorite animation** — the heart button scales down on tap (press
+  feedback) and pops when toggled on.
+- **Skeleton loading** — `SkeletonCard`/`SkeletonGrid` (the `Skeleton`
+  primitive from Phase 3 was built but never used until now) replaces
+  spinners for full-grid loading states on Dashboard, Search, and
+  Trending — better perceived performance than a generic spinner.
+- **Modal animation** — fade + scale enter/exit via `AnimatePresence`
+  (Modal itself isn't wired into any feature yet, but is now
+  animation-complete for whenever it is).
+- **Sidebar animation** — the mobile drawer now slides in/out instead of
+  appearing instantly.
+- **Page transitions** — main content area fades subtly on route change.
+- **Smooth drag interactions** — already covered by dnd-kit's built-in
+  transform/transition in Phase 14; no change needed here.
+
 ---
 
 ## Not yet built (upcoming phases)
-16. Animations & micro-interactions
 17. Loading/error/empty states audit
 18. Accessibility audit
 19. Performance optimization
