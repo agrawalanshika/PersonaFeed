@@ -63,7 +63,10 @@ export default function DashboardPage() {
       {feed.status === "loading" && <SkeletonGrid count={6} />}
 
       {feed.status === "failed" && (
-        <ErrorState message={feed.error ?? "Couldn't load your feed."} />
+        <ErrorState
+          message={feed.error ?? "Couldn't load your feed."}
+          onRetry={feed.refetchFeed}
+        />
       )}
 
       {feed.status === "succeeded" && feed.items.length === 0 && (

@@ -9,6 +9,7 @@ import { normalizeNews, normalizeMovie, normalizeSocial } from "@/lib/normalize"
 import { getFeedCategories, getFeedGenres, mergeFeedItems, applySavedOrder } from "@/lib/feed";
 import { MOVIE_GENRE_TMDB_IDS } from "@/lib/preferences-options";
 import { loadFeedOrder } from "@/lib/storage";
+import type { ContentItem } from "@/types/content";
 import {
   setFeedItems,
   appendFeedItems,
@@ -22,6 +23,11 @@ import {
  * Result is stored in feedSlice, which also holds the user's drag-and-drop
  * order (Phase 14) — any saved order is applied on top of a fresh fetch via
  * applySavedOrder() so reordering survives a refresh where possible.
+ *
+ * Uses Promise.allSettled (not Promise.all) for the underlying fetches —
+ * if one selected source fails (say TMDB has a hiccup) while others
+ * succeed, the feed still shows what did load instead of a blank error
+ * screen. Only shows a full error when every single source failed.
  *
  * Also exposes loadMoreFeed(): genuinely fetches the *next page* from News
  * API and TMDB (both support real pagination) and appends it — this is
@@ -54,6 +60,7 @@ export function useFeed() {
   const [canLoadMore, setCanLoadMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [prevPreferenceKey, setPrevPreferenceKey] = useState(preferenceKey);
+  const [reloadToken, setReloadToken] = useState(0);
 
   // Reset the plain state piece during render (React's documented pattern
   // for "adjusting state when a prop changes"). Ref resets happen in the
@@ -67,6 +74,7 @@ export function useFeed() {
     let cancelled = false;
     const activeCategories = categoriesKey ? categoriesKey.split(",") : [];
     const activeGenres = genresKey ? genresKey.split(",") : [];
+    const hasAnySource = activeCategories.length > 0 || activeGenres.length > 0;
 
     // Fresh preference set — reset pagination bookkeeping.
     newsPageRef.current = Object.fromEntries(
@@ -81,15 +89,15 @@ export function useFeed() {
       dispatch(setFeedStatus("loading"));
       dispatch(setFeedError(null));
 
-      try {
-        const newsResults = await Promise.all(
+      const [newsSettled, movieSettled, socialSettled] = await Promise.all([
+        Promise.allSettled(
           activeCategories.map((category) =>
             dispatch(
               newsApi.endpoints.getTopHeadlines.initiate({ category }),
             ).unwrap(),
           ),
-        );
-        const movieResults = await Promise.all(
+        ),
+        Promise.allSettled(
           activeGenres.map((genre) =>
             dispatch(
               tmdbApi.endpoints.getMoviesByGenre.initiate({
@@ -97,8 +105,8 @@ export function useFeed() {
               }),
             ).unwrap(),
           ),
-        );
-        const socialResults = await Promise.all(
+        ),
+        Promise.allSettled(
           activeCategories.map((category) =>
             dispatch(
               socialApi.endpoints.getTrendingSocialPosts.initiate({
@@ -106,46 +114,73 @@ export function useFeed() {
               }),
             ).unwrap(),
           ),
-        );
+        ),
+      ]);
 
-        const newsItems = newsResults.flatMap((result, index) =>
-          normalizeNews(result.articles, activeCategories[index]),
-        );
-        const movieItems = movieResults.flatMap((result, index) =>
-          normalizeMovie(result.results, activeGenres[index]),
-        );
-        const socialItems = socialResults.flatMap((result) =>
-          normalizeSocial(result),
-        );
+      if (cancelled) return;
 
-        const merged = mergeFeedItems([
-          ...newsItems,
-          ...movieItems,
-          ...socialItems,
-        ]);
-        const ordered = applySavedOrder(merged, loadFeedOrder());
+      const totalAttempts =
+        newsSettled.length + movieSettled.length + socialSettled.length;
+      const totalFailed = [...newsSettled, ...movieSettled, ...socialSettled].filter(
+        (result) => result.status === "rejected",
+      ).length;
 
-        if (!cancelled) {
-          dispatch(setFeedItems(ordered));
-          dispatch(setFeedStatus("succeeded"));
-        }
-      } catch (error) {
-        if (!cancelled) {
-          dispatch(
-            setFeedError(
-              error instanceof Error ? error.message : "Failed to load feed.",
-            ),
-          );
-          dispatch(setFeedStatus("failed"));
-        }
+      if (hasAnySource && totalAttempts > 0 && totalFailed === totalAttempts) {
+        // Every single source failed — this is a genuine outage/offline
+        // situation worth surfacing as a real error, not silently empty.
+        dispatch(
+          setFeedError(
+            "Couldn't load your feed. Check your connection and try again.",
+          ),
+        );
+        dispatch(setFeedStatus("failed"));
+        return;
       }
+
+      const newsItems: ContentItem[] = [];
+      newsSettled.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          newsItems.push(
+            ...normalizeNews(result.value.articles, activeCategories[index]),
+          );
+        }
+      });
+      const movieItems: ContentItem[] = [];
+      movieSettled.forEach((result, index) => {
+        if (result.status === "fulfilled") {
+          movieItems.push(
+            ...normalizeMovie(result.value.results, activeGenres[index]),
+          );
+        }
+      });
+      const socialItems: ContentItem[] = [];
+      socialSettled.forEach((result) => {
+        if (result.status === "fulfilled") {
+          socialItems.push(...normalizeSocial(result.value));
+        }
+      });
+
+      const merged = mergeFeedItems([
+        ...newsItems,
+        ...movieItems,
+        ...socialItems,
+      ]);
+      const ordered = applySavedOrder(merged, loadFeedOrder());
+
+      dispatch(setFeedItems(ordered));
+      dispatch(setFeedStatus("succeeded"));
     }
 
     loadFeed();
     return () => {
       cancelled = true;
     };
-  }, [dispatch, categoriesKey, genresKey]);
+  }, [dispatch, categoriesKey, genresKey, reloadToken]);
+
+  /** Retries the initial load — for when every source failed. */
+  function refetchFeed() {
+    setReloadToken((token) => token + 1);
+  }
 
   async function loadMoreFeed() {
     if (exhaustedRef.current || isLoadingMore) return;
@@ -154,51 +189,48 @@ export function useFeed() {
     const activeCategories = categoriesKey ? categoriesKey.split(",") : [];
     const activeGenres = genresKey ? genresKey.split(",") : [];
 
-    try {
-      const newsBatches = await Promise.all(
-        activeCategories.map(async (category) => {
-          const nextPage = (newsPageRef.current[category] ?? 1) + 1;
-          const result = await dispatch(
-            newsApi.endpoints.getTopHeadlines.initiate({
-              category,
-              page: nextPage,
-            }),
-          ).unwrap();
-          newsPageRef.current[category] = nextPage;
-          return normalizeNews(result.articles, category);
-        }),
-      );
-      const movieBatches = await Promise.all(
-        activeGenres.map(async (genre) => {
-          const nextPage = (moviePageRef.current[genre] ?? 1) + 1;
-          const result = await dispatch(
-            tmdbApi.endpoints.getMoviesByGenre.initiate({
-              genre: String(MOVIE_GENRE_TMDB_IDS[genre] ?? ""),
-              page: nextPage,
-            }),
-          ).unwrap();
-          moviePageRef.current[genre] = nextPage;
-          return normalizeMovie(result.results, genre);
-        }),
-      );
+    const newsSettled = await Promise.allSettled(
+      activeCategories.map(async (category) => {
+        const nextPage = (newsPageRef.current[category] ?? 1) + 1;
+        const result = await dispatch(
+          newsApi.endpoints.getTopHeadlines.initiate({
+            category,
+            page: nextPage,
+          }),
+        ).unwrap();
+        newsPageRef.current[category] = nextPage;
+        return normalizeNews(result.articles, category);
+      }),
+    );
+    const movieSettled = await Promise.allSettled(
+      activeGenres.map(async (genre) => {
+        const nextPage = (moviePageRef.current[genre] ?? 1) + 1;
+        const result = await dispatch(
+          tmdbApi.endpoints.getMoviesByGenre.initiate({
+            genre: String(MOVIE_GENRE_TMDB_IDS[genre] ?? ""),
+            page: nextPage,
+          }),
+        ).unwrap();
+        moviePageRef.current[genre] = nextPage;
+        return normalizeMovie(result.results, genre);
+      }),
+    );
 
-      const newBatch = mergeFeedItems(newsBatches.flat().concat(movieBatches.flat()));
+    const newBatch = mergeFeedItems(
+      [...newsSettled, ...movieSettled].flatMap((result) =>
+        result.status === "fulfilled" ? result.value : [],
+      ),
+    );
 
-      if (newBatch.length === 0) {
-        exhaustedRef.current = true;
-        setCanLoadMore(false);
-      } else {
-        dispatch(appendFeedItems(newBatch));
-      }
-    } catch {
-      // A failed "load more" isn't worth surfacing as a full error screen —
-      // just stop offering more for this session.
+    if (newBatch.length === 0) {
       exhaustedRef.current = true;
       setCanLoadMore(false);
-    } finally {
-      setIsLoadingMore(false);
+    } else {
+      dispatch(appendFeedItems(newBatch));
     }
+
+    setIsLoadingMore(false);
   }
 
-  return { ...feed, loadMoreFeed, canLoadMore, isLoadingMore };
+  return { ...feed, loadMoreFeed, canLoadMore, isLoadingMore, refetchFeed };
 }

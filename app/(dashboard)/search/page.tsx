@@ -60,10 +60,21 @@ export default function SearchPage() {
     (wantsNews && news.isLoading) ||
     (wantsMovies && movies.isLoading) ||
     (wantsSocial && social.isLoading);
-  const hasError =
-    (wantsNews && Boolean(news.error)) ||
-    (wantsMovies && Boolean(movies.error)) ||
-    (wantsSocial && Boolean(social.error));
+
+  const activeSourceCount = [wantsNews, wantsMovies, wantsSocial].filter(
+    Boolean,
+  ).length;
+  const erroredSourceCount = [
+    wantsNews && Boolean(news.error),
+    wantsMovies && Boolean(movies.error),
+    wantsSocial && Boolean(social.error),
+  ].filter(Boolean).length;
+  // Only block the whole page if every active source failed — one flaky
+  // source shouldn't hide results that did come back from the others.
+  const allSourcesErrored =
+    activeSourceCount > 0 && erroredSourceCount === activeSourceCount;
+  const somePartiallyErrored =
+    erroredSourceCount > 0 && erroredSourceCount < activeSourceCount;
 
   const results = useMemo(
     () => [
@@ -130,18 +141,24 @@ export default function SearchPage() {
 
       {hasQuery && isLoading && <SkeletonGrid count={6} />}
 
-      {hasQuery && !isLoading && hasError && (
+      {hasQuery && !isLoading && allSourcesErrored && (
         <ErrorState message="Something went wrong searching." onRetry={handleRetry} />
       )}
 
-      {hasQuery && !isLoading && !hasError && results.length === 0 && (
+      {hasQuery && !isLoading && !allSourcesErrored && somePartiallyErrored && (
+        <p className="text-sm text-muted">
+          Some results couldn&apos;t be loaded — showing what did come through.
+        </p>
+      )}
+
+      {hasQuery && !isLoading && !allSourcesErrored && results.length === 0 && (
         <EmptyState
           title="No results found"
           description={`Nothing matched "${debouncedQuery}". Try a different search.`}
         />
       )}
 
-      {hasQuery && !isLoading && !hasError && results.length > 0 && (
+      {hasQuery && !isLoading && !allSourcesErrored && results.length > 0 && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {visibleItems.map((item, index) => (

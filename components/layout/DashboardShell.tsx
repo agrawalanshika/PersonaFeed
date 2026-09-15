@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
+import OfflineBanner from "@/components/layout/OfflineBanner";
 import { NAV_ITEMS } from "@/lib/nav";
 
 type DashboardShellProps = {
@@ -57,6 +58,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
 
       <div className="flex min-h-0 flex-1 flex-col">
         <Header title={title} onMenuClick={() => setDrawerOpen(true)} />
+        <OfflineBanner />
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
           <AnimatePresence mode="wait">
             <motion.div
