@@ -260,10 +260,23 @@ not flashy":
 - **Smooth drag interactions** — already covered by dnd-kit's built-in
   transform/transition in Phase 14; no change needed here.
 
+## Phase 17 — Loading/Error/Empty States Audit ✅
+A real audit, not a rubber stamp — most states were already built
+incrementally, but this pass found and fixed a genuine bug: `useFeed` and
+Search both used `Promise.all` across their parallel API calls, meaning
+**one failed source blanked the entire result set** even when others
+succeeded (e.g. TMDB hiccups → News API results you'd have gotten
+disappear too). Switched both to `Promise.allSettled`; a full error now
+only shows when *every* active source fails, and Search shows a subtle
+"some results couldn't be loaded" note when only some fail. Added
+`refetchFeed()` so the Dashboard's full-failure error state has a working
+retry button (it didn't before). New `OfflineBanner` distinguishes "you
+have no network connection" from "an API is down" — genuinely different
+situations that were previously indistinguishable to the user.
+
 ---
 
 ## Not yet built (upcoming phases)
-17. Loading/error/empty states audit
 18. Accessibility audit
 19. Performance optimization
 20-22. Unit / integration / E2E testing
