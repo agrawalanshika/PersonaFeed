@@ -101,7 +101,7 @@ export function useFeed() {
           activeGenres.map((genre) =>
             dispatch(
               tmdbApi.endpoints.getMoviesByGenre.initiate({
-                genre: String(MOVIE_GENRE_TMDB_IDS[genre] ?? ""),
+                genre: String(MOVIE_GENRE_TMDB_IDS[genre] ?? MOVIE_GENRE_TMDB_IDS.Action),
               }),
             ).unwrap(),
           ),
@@ -221,7 +221,7 @@ export function useFeed() {
         const nextPage = (moviePageRef.current[genre] ?? 1) + 1;
         const result = await dispatch(
           tmdbApi.endpoints.getMoviesByGenre.initiate({
-            genre: String(MOVIE_GENRE_TMDB_IDS[genre] ?? ""),
+            genre: String(MOVIE_GENRE_TMDB_IDS[genre] ?? MOVIE_GENRE_TMDB_IDS.Action),
             page: nextPage,
           }),
         ).unwrap();
