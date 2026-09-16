@@ -69,6 +69,10 @@ export default function DashboardPage() {
         />
       )}
 
+      {feed.status === "succeeded" && feed.error && (
+        <p className="text-sm text-muted">{feed.error}</p>
+      )}
+
       {feed.status === "succeeded" && feed.items.length === 0 && (
         <EmptyState
           title="Nothing here yet"

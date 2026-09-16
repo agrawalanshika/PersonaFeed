@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ContentItem } from "@/types/content";
+import { normalizeForDedup } from "@/lib/feed";
 
 export type FeedStatus = "idle" | "loading" | "succeeded" | "failed";
 
@@ -33,9 +34,15 @@ const feedSlice = createSlice({
      * exhausted, as opposed to setFeedItems which replaces everything. */
     appendFeedItems(state, action: PayloadAction<ContentItem[]>) {
       const existingIds = new Set(state.items.map((item) => item.id));
-      const newItems = action.payload.filter(
-        (item) => !existingIds.has(item.id),
+      const existingContent = new Set(
+        state.items.map(
+          (item) => `${item.type}:${normalizeForDedup(item.title)}`,
+        ),
       );
+      const newItems = action.payload.filter((item) => {
+        const contentKey = `${item.type}:${normalizeForDedup(item.title)}`;
+        return !existingIds.has(item.id) && !existingContent.has(contentKey);
+      });
       state.items = [...state.items, ...newItems];
       state.order = state.items.map((item) => item.id);
     },

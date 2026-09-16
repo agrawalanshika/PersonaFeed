@@ -167,6 +167,20 @@ export function useFeed() {
       ]);
       const ordered = applySavedOrder(merged, loadFeedOrder());
 
+      // Some (not all) sources failed — worth a soft note so a silently
+      // empty category (e.g. movies) doesn't look like it was never there.
+      if (totalFailed > 0) {
+        const failedTypes: string[] = [];
+        if (newsSettled.some((r) => r.status === "rejected")) failedTypes.push("news");
+        if (movieSettled.some((r) => r.status === "rejected")) failedTypes.push("movies");
+        if (socialSettled.some((r) => r.status === "rejected")) failedTypes.push("social");
+        dispatch(
+          setFeedError(
+            `Couldn't load ${failedTypes.join(" or ")} this time — showing what did load.`,
+          ),
+        );
+      }
+
       dispatch(setFeedItems(ordered));
       dispatch(setFeedStatus("succeeded"));
     }

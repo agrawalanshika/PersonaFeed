@@ -14,7 +14,10 @@ export function getFeedGenres(moviePreferences: string[]): string[] {
 }
 
 /**
- * Dedupes by id, then combines recency with topic mixing:
+ * Dedupes by id AND by normalized content (catches genuine duplicates that
+ * arrive under different ids — e.g. the same story boosted by two
+ * different Mastodon accounts, or syndicated to two outlets with
+ * different article URLs), then combines recency with topic mixing:
  *   1. Rank each type's items newest-first internally (comparing timestamps
  *      *within* a type only — a movie's release date and a social post's
  *      timestamp aren't on the same scale, so cross-type comparison isn't
@@ -26,12 +29,16 @@ export function getFeedGenres(moviePreferences: string[]): string[] {
  * within any given wave is randomized instead of a fixed pattern.
  */
 export function mergeFeedItems(items: ContentItem[]): ContentItem[] {
-  const seen = new Set<string>();
+  const seenIds = new Set<string>();
+  const seenContent = new Set<string>();
   const deduped: ContentItem[] = [];
 
   for (const item of items) {
-    if (seen.has(item.id)) continue;
-    seen.add(item.id);
+    if (seenIds.has(item.id)) continue;
+    const contentKey = `${item.type}:${normalizeForDedup(item.title)}`;
+    if (seenContent.has(contentKey)) continue;
+    seenIds.add(item.id);
+    seenContent.add(contentKey);
     deduped.push(item);
   }
 
@@ -69,6 +76,16 @@ function shuffle<T>(array: T[]): T[] {
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
+}
+
+/** Lowercases, strips punctuation/whitespace differences so near-identical
+ * titles (same story, different casing/trailing whitespace/source suffix
+ * punctuation) are recognized as the same content. */
+export function normalizeForDedup(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
 }
 
 /**
