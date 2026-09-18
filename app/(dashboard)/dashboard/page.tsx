@@ -53,6 +53,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <h2 className="sr-only">Your personalized feed</h2>
       <p className="max-w-2xl text-sm text-muted">
         Your personalized feed, built from the interests and movie genres you
         picked in Settings. Nothing selected yet? You&apos;re seeing a sensible

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 
@@ -12,13 +12,26 @@ type ModalProps = {
 };
 
 export default function Modal({ open, onClose, title, children }: ModalProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
+
+    // Standard dialog pattern: remember what had focus, move focus into
+    // the dialog, and give it back when the dialog closes.
+    previouslyFocusedRef.current = document.activeElement as HTMLElement;
+    closeButtonRef.current?.focus();
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedRef.current?.focus();
+    };
   }, [open, onClose]);
 
   return (
@@ -49,6 +62,7 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
                 {title}
               </h2>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={onClose}
                 aria-label="Close dialog"

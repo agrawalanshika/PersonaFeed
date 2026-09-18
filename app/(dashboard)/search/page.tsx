@@ -97,6 +97,7 @@ export default function SearchPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <h2 className="sr-only">Search results</h2>
       <p className="max-w-2xl text-sm text-muted">
         Search across news, movies, and social posts at once.
       </p>

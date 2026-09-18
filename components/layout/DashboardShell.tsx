@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -19,8 +19,26 @@ export default function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const title = NAV_ITEMS.find((item) => item.href === pathname)?.label ?? "Dashboard";
 
+  // Keyboard users should be able to dismiss the drawer the same way
+  // Modal already supports — Escape, not just clicking the backdrop/X.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [drawerOpen]);
+
   return (
     <div className="flex h-dvh flex-col md:flex-row">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-accent-foreground"
+      >
+        Skip to main content
+      </a>
+
       <Sidebar variant="static" />
 
       <AnimatePresence>
@@ -59,7 +77,7 @@ export default function DashboardShell({ children }: DashboardShellProps) {
       <div className="flex min-h-0 flex-1 flex-col">
         <Header title={title} onMenuClick={() => setDrawerOpen(true)} />
         <OfflineBanner />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
