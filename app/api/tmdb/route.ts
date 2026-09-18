@@ -30,10 +30,15 @@ export async function GET(request: NextRequest) {
   if (type === "search") upstream.searchParams.set("query", query || "");
   if (type === "discover" && genre) upstream.searchParams.set("with_genres", genre);
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
   try {
     const response = await fetch(upstream.toString(), {
       next: { revalidate: 60 },
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const detail = await response.text();
@@ -46,9 +51,16 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    clearTimeout(timeoutId);
+    const isTimeout = error instanceof Error && error.name === "AbortError";
     return NextResponse.json(
-      { error: "Failed to reach TMDB.", detail: (error as Error).message },
-      { status: 502 },
+      {
+        error: isTimeout
+          ? "TMDB request timed out — this can happen when TMDB is unreachable from your network."
+          : "Failed to reach TMDB.",
+        detail: (error as Error).message,
+      },
+      { status: isTimeout ? 504 : 502 },
     );
   }
 }
