@@ -274,10 +274,41 @@ retry button (it didn't before). New `OfflineBanner` distinguishes "you
 have no network connection" from "an API is down" — genuinely different
 situations that were previously indistinguishable to the user.
 
+## Phase 18 — Accessibility Audit ✅
+A real audit with computed evidence, not eyeballing. Checked the spec's
+list item by item:
+- **Contrast** — computed actual WCAG relative-luminance ratios for every
+  text/background color pair in both themes (a script, not a guess).
+  Found two real failures: light theme's rating-badge text (3.33:1) and
+  dark theme's selected-chip text (3.83:1), both below the required
+  4.5:1 for normal-size text. Fixed both (now 5.02:1 and 6.54:1) and
+  verified the new values don't regress any of the other already-passing
+  pairs (button text actually improved as a side effect).
+- **Keyboard navigation** — mobile drawer now closes on Escape (it only
+  supported backdrop-click/X-button before; Modal already had Escape).
+  `Modal` gained proper dialog focus management: moves focus to its close
+  button on open, restores focus to whatever triggered it on close — the
+  standard accessible-dialog pattern, previously missing.
+- **Skip link** — added a "Skip to main content" link, visible on
+  keyboard focus, so keyboard users don't have to tab through the full
+  sidebar on every single page.
+- **Heading hierarchy** — Dashboard and Search jumped from the page's
+  `<h1>` (in Header) straight to each card's `<h3>`, skipping `<h2>`.
+  Added visually-hidden `<h2>`s to fix the skip without changing anything
+  visually. Favorites and Trending already had real, visible `<h2>`
+  section headers, so no fix was needed there.
+- **Focus indicators, aria-labels, semantic HTML, alt text** — checked
+  and already in good shape from earlier phases (global focus-visible
+  outline since Phase 2, aria-pressed/aria-label on icon buttons since
+  Phase 3-4, semantic `<nav>`/`<header>`/`<main>`/`<article>` throughout,
+  dnd-kit's built-in keyboard support and ARIA for the sortable grid since
+  Phase 14). Card thumbnails intentionally use `alt=""` — this is the
+  correct WCAG pattern (not an oversight) when an image is immediately
+  followed by adjacent text conveying the same identity (the card title).
+
 ---
 
 ## Not yet built (upcoming phases)
-18. Accessibility audit
 19. Performance optimization
 20-22. Unit / integration / E2E testing
 23. Bonus features
