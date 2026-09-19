@@ -5,7 +5,8 @@ import PaginationFooter from "@/components/content/PaginationFooter";
 import { SkeletonGrid } from "@/components/content/SkeletonCard";
 import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
+import { useFavoriteIds } from "@/hooks/useFavoriteIds";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
 import { setFeedItems } from "@/store/slices/feedSlice";
 import { useFeed } from "@/hooks/useFeed";
@@ -17,9 +18,7 @@ const PAGE_SIZE = 9;
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
-  const favoriteIds = useAppSelector((state) =>
-    new Set(state.favorites.items.map((item) => item.id)),
-  );
+  const favoriteIds = useFavoriteIds();
   const feed = useFeed();
   const { visibleItems, hasMore, loadMore } = usePaginatedItems(
     feed.items,

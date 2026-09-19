@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { Heart, Star } from "lucide-react";
 import type { ContentItem } from "@/types/content";
@@ -10,11 +10,12 @@ type ContentCardProps = {
   item: ContentItem;
   isFavorited?: boolean;
   onToggleFavorite?: (id: string) => void;
-  /** Optional stagger index for the entrance animation (capped internally). */
+  /** Optional stagger index for the entrance animation (capped internally)
+   * and to decide eager vs. lazy image loading (first row loads eagerly). */
   index?: number;
 };
 
-export default function ContentCard({
+function ContentCard({
   item,
   isFavorited = false,
   onToggleFavorite,
@@ -41,6 +42,8 @@ export default function ContentCard({
         <img
           src={imgSrc}
           alt=""
+          loading={index < 3 ? "eager" : "lazy"}
+          decoding="async"
           className="h-full w-full object-cover"
           onError={() => setImgSrc(fallbackSrc)}
         />
@@ -95,3 +98,5 @@ export default function ContentCard({
     </motion.article>
   );
 }
+
+export default memo(ContentCard);

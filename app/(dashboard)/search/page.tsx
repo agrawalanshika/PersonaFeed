@@ -7,7 +7,8 @@ import ErrorState from "@/components/ui/ErrorState";
 import EmptyState from "@/components/ui/EmptyState";
 import ContentCard from "@/components/content/ContentCard";
 import PaginationFooter from "@/components/content/PaginationFooter";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
+import { useFavoriteIds } from "@/hooks/useFavoriteIds";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { usePaginatedItems } from "@/hooks/usePaginatedItems";
@@ -30,9 +31,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 export default function SearchPage() {
   const dispatch = useAppDispatch();
-  const favoriteIds = useAppSelector(
-    (state) => new Set(state.favorites.items.map((item) => item.id)),
-  );
+  const favoriteIds = useFavoriteIds();
 
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");

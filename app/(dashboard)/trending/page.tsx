@@ -1,7 +1,8 @@
 "use client";
 
 import ContentSection from "@/components/content/ContentSection";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useAppDispatch } from "@/store/hooks";
+import { useFavoriteIds } from "@/hooks/useFavoriteIds";
 import { toggleFavorite } from "@/store/slices/favoritesSlice";
 import { useGetTopHeadlinesQuery } from "@/services/newsApi";
 import { useGetTrendingMoviesQuery } from "@/services/tmdbApi";
@@ -11,9 +12,7 @@ import type { ContentItem } from "@/types/content";
 
 export default function TrendingPage() {
   const dispatch = useAppDispatch();
-  const favoriteIds = useAppSelector(
-    (state) => new Set(state.favorites.items.map((item) => item.id)),
-  );
+  const favoriteIds = useFavoriteIds();
 
   const news = useGetTopHeadlinesQuery();
   const movies = useGetTrendingMoviesQuery();
