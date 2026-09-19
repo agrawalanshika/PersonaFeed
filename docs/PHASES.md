@@ -306,10 +306,29 @@ list item by item:
   correct WCAG pattern (not an oversight) when an image is immediately
   followed by adjacent text conveying the same identity (the card title).
 
+## Phase 19 — Performance Optimization ✅
+Found and fixed a real re-render bug, not just theoretical polish:
+`Dashboard`, `Trending`, and `Search` all built `favoriteIds` by calling
+`new Set(state.favorites.items.map(...))` **directly inside**
+`useAppSelector`. Since that allocates a brand-new object on every call,
+and `useSelector`'s default equality check is reference equality, this
+forced all three pages to re-render on **every single Redux store
+update** — a theme toggle, a feed load, anything — not just when
+favorites actually changed. New shared `useFavoriteIds()` hook selects
+the raw `favorites.items` array first (a stable reference unless favorites
+genuinely change) and only rebuilds the `Set` via `useMemo` when that
+reference changes. `ContentCard` is now wrapped in `React.memo` as
+defense-in-depth on top of that fix. Card images gained `loading="lazy"`
+(eager for the first row, so above-the-fold content doesn't flash in) and
+`decoding="async"` — previously every image in a feed loaded eagerly
+regardless of scroll position, wasteful once infinite scroll (Phase 13)
+can produce dozens of cards. Debounced search (Phase 12), client-side
+pagination (Phase 13), and RTK Query's built-in request caching (Phase 6)
+were already in place and needed no changes.
+
 ---
 
 ## Not yet built (upcoming phases)
-19. Performance optimization
 20-22. Unit / integration / E2E testing
 23. Bonus features
 24. Security audit
