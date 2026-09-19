@@ -18,7 +18,7 @@ This project is being built incrementally, phase by phase. See
 - Playwright (E2E tests) — added Phase 22
 
 ## Status
-**Phase 20 of 29 complete.** See `docs/PHASES.md` for the full breakdown.
+**Phase 21 of 29 complete.** See `docs/PHASES.md` for the full breakdown.
 
 ## Getting Started
 
@@ -39,7 +39,10 @@ npm run test:watch # re-run on file changes
 
 `tests/unit/` covers reducers, the normalization adapters, feed
 merge/dedup/shuffle logic, localStorage persistence, and the debounce
-hook — the pure business logic, not UI rendering (that's Phase 21).
+hook. `tests/integration/` covers components rendering together with
+real data and a real Redux store — loading/error/empty/success states,
+Settings/Favorites pages wired to actual reducers (not mocks), and
+button interactions.
 
 ## Environment Variables
 See `.env.local.example` for the full list. Setup instructions:
@@ -71,4 +74,4 @@ lib/            normalize.ts, storage.ts, preferences-options.ts  (Phase 5-7)
 types/          Shared types incl. ContentItem                    (Phase 7)
 docs/           PHASES.md — running implementation log
 ```
-(`tests/unit` has real tests now. `tests/integration`, `tests/e2e` are added in Phases 21-22.)
+(`tests/unit` and `tests/integration` have real tests now. `tests/e2e` is added in Phase 22.)
