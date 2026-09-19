@@ -14,11 +14,11 @@ This project is being built incrementally, phase by phase. See
 - dnd-kit (drag-and-drop)
 - lucide-react (icons)
 - News API + TMDB API + Mastodon public API for social content
-- Vitest + React Testing Library (unit/integration tests) — added Phase 20-21
+- Vitest + React Testing Library (unit tests added; integration Phase 21)
 - Playwright (E2E tests) — added Phase 22
 
 ## Status
-**Phase 7 of 29 complete.** See `docs/PHASES.md` for the full breakdown.
+**Phase 20 of 29 complete.** See `docs/PHASES.md` for the full breakdown.
 
 ## Getting Started
 
@@ -29,6 +29,17 @@ npm run dev
 ```
 
 Open http://localhost:3000.
+
+## Testing
+
+```bash
+npm test          # run once
+npm run test:watch # re-run on file changes
+```
+
+`tests/unit/` covers reducers, the normalization adapters, feed
+merge/dedup/shuffle logic, localStorage persistence, and the debounce
+hook — the pure business logic, not UI rendering (that's Phase 21).
 
 ## Environment Variables
 See `.env.local.example` for the full list. Setup instructions:
@@ -60,4 +71,4 @@ lib/            normalize.ts, storage.ts, preferences-options.ts  (Phase 5-7)
 types/          Shared types incl. ContentItem                    (Phase 7)
 docs/           PHASES.md — running implementation log
 ```
-(`tests/unit`, `tests/integration`, `tests/e2e` are added in Phases 20-22.)
+(`tests/unit` has real tests now. `tests/integration`, `tests/e2e` are added in Phases 21-22.)
