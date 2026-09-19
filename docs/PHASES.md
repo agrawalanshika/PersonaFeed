@@ -326,10 +326,35 @@ can produce dozens of cards. Debounced search (Phase 12), client-side
 pagination (Phase 13), and RTK Query's built-in request caching (Phase 6)
 were already in place and needed no changes.
 
+## Phase 20 — Unit Testing ✅
+Vitest + React Testing Library, `tests/unit/` recreated with real
+content. **70 tests across 8 files**, `npm test` (`npm run test:watch`
+for dev). Coverage:
+- **Reducers** — all four slices (`preferencesSlice`, `favoritesSlice`,
+  `feedSlice`, `uiSlice`), including `appendFeedItems`' dedup logic
+  tested against the exact duplicate-boosted-post bug fixed earlier
+  (same story, different id, different casing — correctly collapsed to
+  one; same title across *different* content types correctly kept
+  separate).
+- **Normalization** — all three adapters, covering the real edge cases
+  hit in production along the way: `[Removed]` News API articles,
+  TMDB's backdrop-over-poster fallback chain, HTML-stripped Mastodon
+  content, and the link-preview-card image fallback.
+- **Feed business logic** — cold-start defaults, the wave-based merge/
+  dedup/shuffle (recency ordering verified, not just "it runs"), and
+  `applySavedOrder`'s reorder/append/stale-id-ignore behavior.
+- **Debounce hook** — fake-timer-based, checking actual timing (doesn't
+  fire early, does fire exactly at the delay, and rapid changes reset
+  the timer rather than stacking) instead of just asserting it
+  "eventually" returns the right value.
+- **localStorage persistence** — round-trip correctness for all four
+  stored values, plus corrupted-JSON and wrong-shape handling for each.
+
 ---
 
 ## Not yet built (upcoming phases)
-20-22. Unit / integration / E2E testing
+21. Integration testing
+22. E2E testing
 23. Bonus features
 24. Security audit
 25. Final UI/UX polish
