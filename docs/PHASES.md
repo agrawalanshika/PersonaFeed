@@ -350,10 +350,31 @@ for dev). Coverage:
 - **localStorage persistence** — round-trip correctness for all four
   stored values, plus corrupted-JSON and wrong-shape handling for each.
 
+## Phase 21 — Integration Testing ✅
+**21 tests across 4 files** in `tests/integration/`, testing components
+rendering *together* with real data — not isolated logic:
+- **`ContentSection`** — the full loading → error → empty → success
+  state machine (directly matching the spec's own examples: API response
+  → Feed → Cards, API error → ErrorState, no results → EmptyState), plus
+  clicking a card's favorite button and verifying the correct item is
+  passed up.
+- **`SettingsPage`** and **`FavoritesPage`** — tested against a *real*
+  Redux store (a new `renderWithStore` helper wraps components in the
+  actual `Provider` + `makeStore()`, not a mock). Clicking a preference
+  chip genuinely dispatches through `preferencesSlice` and the UI
+  re-renders from real state; removing a favorite via its heart button
+  genuinely updates `favoritesSlice` and the empty state appears when
+  the list empties out.
+- **`PaginationFooter`** — its three mutually exclusive states (button /
+  loading spinner / reached-the-end note) and the button click.
+
+Added an `IntersectionObserver` stub to `vitest.setup.ts` — jsdom
+doesn't implement it, and `LoadMoreSentinel` (used by `PaginationFooter`)
+depends on it.
+
 ---
 
 ## Not yet built (upcoming phases)
-21. Integration testing
 22. E2E testing
 23. Bonus features
 24. Security audit
