@@ -32,10 +32,10 @@ The project was built incrementally end-to-end — application shell, design sys
   </tr>
   <tr>
     <td>
-      <img src="assets/img1.png" alt="Dashboard" width="450"/>
+      <img src="assets/img1.png" alt="Dashboard" width="1000"/>
     </td>
     <td>
-      <img src="assets/img2.png" alt="Favorites" width="450"/>
+      <img src="assets/img2.png" alt="Favorites" width="1000"/>
     </td>
   </tr>
   <tr>
@@ -48,10 +48,10 @@ The project was built incrementally end-to-end — application shell, design sys
   </tr>
   <tr>
     <td>
-      <img src="assets/img3.png" alt="Trending" width="450"/>
+      <img src="assets/img3.png" alt="Trending" width="1000"/>
     </td>
     <td>
-      <img src="assets/img4.png" alt="Search" width="450"/>
+      <img src="assets/img4.png" alt="Search" width="1000"/>
     </td>
   </tr>
 </table>
