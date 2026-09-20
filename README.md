@@ -190,6 +190,7 @@ npm run test:watch # re-run on file changes
 ## 🔮 Future Improvements
 
 - End-to-end testing (Playwright)
+- Deployment
 - Real pagination for Mastodon content, if/when the API supports it
 - Additional content sources (e.g. podcasts, GitHub trending)
 - User accounts, so preferences and favorites persist beyond a single browser
