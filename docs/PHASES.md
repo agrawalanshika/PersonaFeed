@@ -374,12 +374,5 @@ depends on it.
 
 ---
 
-## Not yet built (upcoming phases)
-22. E2E testing
-23. Bonus features
-24. Security audit
-25. Final UI/UX polish
-26. Deployment
-27. README finalization
-28. Demo video
-29. Final submission audit
+## Upcoming phases
+22. Deployment

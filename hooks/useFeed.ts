@@ -6,7 +6,11 @@ import { newsApi } from "@/services/newsApi";
 import { tmdbApi } from "@/services/tmdbApi";
 import { socialApi } from "@/services/socialApi";
 import { normalizeNews, normalizeMovie, normalizeSocial } from "@/lib/normalize";
-import { getFeedCategories, getFeedGenres, mergeFeedItems, applySavedOrder } from "@/lib/feed";
+import {
+  getFeedCategories,
+  getFeedGenres,
+  mergeFeedItems,
+} from "@/lib/feed";
 import { MOVIE_GENRE_TMDB_IDS } from "@/lib/preferences-options";
 import { loadFeedOrder } from "@/lib/storage";
 import type { ContentItem } from "@/types/content";
@@ -159,13 +163,11 @@ export function useFeed() {
           socialItems.push(...normalizeSocial(result.value));
         }
       });
-
-      const merged = mergeFeedItems([
-        ...newsItems,
-        ...movieItems,
-        ...socialItems,
-      ]);
-      const ordered = applySavedOrder(merged, loadFeedOrder());
+     const ordered = mergeFeedItems([
+  ...newsItems,
+  ...movieItems,
+  ...socialItems,
+]);
 
       // Some (not all) sources failed — worth a soft note so a silently
       // empty category (e.g. movies) doesn't look like it was never there.

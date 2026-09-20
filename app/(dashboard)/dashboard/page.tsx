@@ -1,3 +1,4 @@
+
 "use client";
 
 import SortableContentGrid from "@/components/content/SortableContentGrid";
@@ -13,6 +14,7 @@ import { useFeed } from "@/hooks/useFeed";
 import { usePaginatedItems } from "@/hooks/usePaginatedItems";
 import { saveFeedOrder } from "@/lib/storage";
 import type { ContentItem } from "@/types/content";
+import Greeting from "@/components/dashboard/Greeting";
 
 const PAGE_SIZE = 9;
 
@@ -20,47 +22,61 @@ export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const favoriteIds = useFavoriteIds();
   const feed = useFeed();
+
   const { visibleItems, hasMore, loadMore } = usePaginatedItems(
     feed.items,
     PAGE_SIZE,
   );
 
-  // Two-tier pagination: first reveal more of what's already fetched
-  // (instant, no network call); once that's exhausted, actually fetch the
-  // next page from News API/TMDB and reveal that too — genuine infinite
-  // scroll rather than paginating through one fixed batch.
+  // Dynamic greeting is displayed using the Greeting component.
+
+  // Two-tier pagination:
+  // First reveal more already-fetched items.
+  // Once exhausted, fetch the next page from News API/TMDB.
   const handleLoadMore = async () => {
     if (hasMore) {
       loadMore();
       return;
     }
+
     if (feed.canLoadMore) {
       await feed.loadMoreFeed();
       loadMore();
     }
   };
 
-  // Drag-and-drop only reorders what's currently visible/paginated — the
-  // reordered slice gets spliced back in front of whatever hasn't been
-  // revealed yet, and the full resulting order is persisted.
+  // Reorder visible items and persist the new feed order.
   const handleReorder = (reorderedVisible: ContentItem[]) => {
     const rest = feed.items.slice(visibleItems.length);
-    const newItems = [...reorderedVisible, ...rest];
+
+    const newItems = [
+      ...reorderedVisible,
+      ...rest,
+    ];
+
     dispatch(setFeedItems(newItems));
     saveFeedOrder(newItems.map((item) => item.id));
   };
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="sr-only">Your personalized feed</h2>
+      {/* Dynamic time-based greeting */}
+      <Greeting />
+
+      <h2 className="sr-only">
+        Your personalized feed
+      </h2>
+
       <p className="max-w-2xl text-sm text-muted">
-        Your personalized feed, built from the interests and movie genres you
-        picked in Settings. Nothing selected yet? You&apos;re seeing a sensible
-        default until you do. Drag any card to reorder your feed —
-        it&apos;ll stick around next time you visit.
+        Your personalized feed, built from the interests and movie
+        genres you picked. Nothing selected yet? You&apos;re seeing
+        a sensible default until you do. Drag any card to reorder
+        your feed — it&apos;ll stick around next time you visit.
       </p>
 
-      {feed.status === "loading" && <SkeletonGrid count={6} />}
+      {feed.status === "loading" && (
+        <SkeletonGrid count={6} />
+      )}
 
       {feed.status === "failed" && (
         <ErrorState
@@ -70,32 +86,39 @@ export default function DashboardPage() {
       )}
 
       {feed.status === "succeeded" && feed.error && (
-        <p className="text-sm text-muted">{feed.error}</p>
+        <p className="text-sm text-muted">
+          {feed.error}
+        </p>
       )}
 
-      {feed.status === "succeeded" && feed.items.length === 0 && (
-        <EmptyState
-          title="Nothing here yet"
-          description="Try picking a few interests in Settings to fill your feed."
-        />
-      )}
+      {feed.status === "succeeded" &&
+        feed.items.length === 0 && (
+          <EmptyState
+            title="Nothing here yet"
+            description="Try picking a few interests in Settings to fill your feed."
+          />
+        )}
 
-      {feed.status === "succeeded" && feed.items.length > 0 && (
-        <>
-          <SortableContentGrid
-            items={visibleItems}
-            favoriteIds={favoriteIds}
-            onToggleFavorite={(item) => dispatch(toggleFavorite(item))}
-            onReorder={handleReorder}
-          />
-          <PaginationFooter
-            hasMore={hasMore || feed.canLoadMore}
-            onLoadMore={handleLoadMore}
-            isLoadingMore={feed.isLoadingMore}
-            showEndNote={feed.items.length > PAGE_SIZE}
-          />
-        </>
-      )}
+      {feed.status === "succeeded" &&
+        feed.items.length > 0 && (
+          <>
+            <SortableContentGrid
+              items={visibleItems}
+              favoriteIds={favoriteIds}
+              onToggleFavorite={(item) =>
+                dispatch(toggleFavorite(item))
+              }
+              onReorder={handleReorder}
+            />
+
+            <PaginationFooter
+              hasMore={hasMore || feed.canLoadMore}
+              onLoadMore={handleLoadMore}
+              isLoadingMore={feed.isLoadingMore}
+              showEndNote={feed.items.length > PAGE_SIZE}
+            />
+          </>
+        )}
     </div>
   );
 }

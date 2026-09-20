@@ -1,7 +1,7 @@
+
 import type { ContentItem } from "@/types/content";
 
-// Cold-start defaults so the feed isn't empty before a user sets any
-// preferences in Settings.
+// Cold-start defaults
 const DEFAULT_INTERESTS = ["Technology"];
 const DEFAULT_MOVIE_GENRES = ["Action"];
 
@@ -10,23 +10,21 @@ export function getFeedCategories(interests: string[]): string[] {
 }
 
 export function getFeedGenres(moviePreferences: string[]): string[] {
-  return moviePreferences.length > 0 ? moviePreferences : DEFAULT_MOVIE_GENRES;
+  return moviePreferences.length > 0
+    ? moviePreferences
+    : DEFAULT_MOVIE_GENRES;
 }
 
 /**
- * Dedupes by id AND by normalized content (catches genuine duplicates that
- * arrive under different ids — e.g. the same story boosted by two
- * different Mastodon accounts, or syndicated to two outlets with
- * different article URLs), then combines recency with topic mixing:
- *   1. Rank each type's items newest-first internally (comparing timestamps
- *      *within* a type only — a movie's release date and a social post's
- *      timestamp aren't on the same scale, so cross-type comparison isn't
- *      meaningful).
- *   2. Group same-rank items across types into a "wave" (the most-recent
- *      news + most-recent social + most-recent movie form wave 0, etc).
- *   3. Shuffle only within each wave, then concatenate waves in order.
- * Net effect: recent items surface near the top, but which type leads
- * within any given wave is randomized instead of a fixed pattern.
+ * Removes duplicate items and randomizes the entire feed.
+ *
+ * News, movies, and social content are combined into
+ * one array and shuffled together.
+ */
+
+/**
+ * Deduplicates content and sorts everything by date,
+ * newest first, regardless of content type.
  */
 export function mergeFeedItems(items: ContentItem[]): ContentItem[] {
   const seenIds = new Set<string>();
@@ -35,52 +33,51 @@ export function mergeFeedItems(items: ContentItem[]): ContentItem[] {
 
   for (const item of items) {
     if (seenIds.has(item.id)) continue;
+
     const contentKey = `${item.type}:${normalizeForDedup(item.title)}`;
+
     if (seenContent.has(contentKey)) continue;
+
     seenIds.add(item.id);
     seenContent.add(contentKey);
     deduped.push(item);
   }
 
-  const byRecency = (a: ContentItem, b: ContentItem) => {
-    const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-    const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+  // Sort ALL content types by date, newest first.
+  return deduped.sort((a, b) => {
+    const aTime = a.publishedAt
+      ? new Date(a.publishedAt).getTime()
+      : 0;
+
+    const bTime = b.publishedAt
+      ? new Date(b.publishedAt).getTime()
+      : 0;
+
     return bTime - aTime;
-  };
-
-  const news = deduped.filter((item) => item.type === "news").sort(byRecency);
-  const social = deduped
-    .filter((item) => item.type === "social")
-    .sort(byRecency);
-  const movie = deduped
-    .filter((item) => item.type === "movie")
-    .sort(byRecency);
-
-  const merged: ContentItem[] = [];
-  const waveCount = Math.max(news.length, social.length, movie.length);
-  for (let i = 0; i < waveCount; i++) {
-    const wave = [news[i], social[i], movie[i]].filter(
-      (item): item is ContentItem => Boolean(item),
-    );
-    merged.push(...shuffle(wave));
-  }
-
-  return merged;
+  });
 }
 
-/** Fisher-Yates shuffle — unbiased, doesn't mutate the input array. */
+/**
+ * Fisher-Yates shuffle
+ */
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
+
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
+
+    [result[i], result[j]] = [
+      result[j],
+      result[i],
+    ];
   }
+
   return result;
 }
 
-/** Lowercases, strips punctuation/whitespace differences so near-identical
- * titles (same story, different casing/trailing whitespace/source suffix
- * punctuation) are recognized as the same content. */
+/**
+ * Normalizes titles for duplicate detection.
+ */
 export function normalizeForDedup(title: string): string {
   return title
     .toLowerCase()
@@ -89,10 +86,7 @@ export function normalizeForDedup(title: string): string {
 }
 
 /**
- * Applies a saved drag-and-drop order on top of freshly-fetched items.
- * Items matching a saved id appear in that saved sequence first; anything
- * new (not part of the saved order — likely because the feed refreshed
- * with different live content) is appended afterward in its normal order.
+ * Applies a saved drag-and-drop order.
  */
 export function applySavedOrder(
   items: ContentItem[],
@@ -100,11 +94,15 @@ export function applySavedOrder(
 ): ContentItem[] {
   if (!savedOrder || savedOrder.length === 0) return items;
 
-  const remaining = new Map(items.map((item) => [item.id, item]));
+  const remaining = new Map(
+    items.map((item) => [item.id, item]),
+  );
+
   const ordered: ContentItem[] = [];
 
   for (const id of savedOrder) {
     const item = remaining.get(id);
+
     if (item) {
       ordered.push(item);
       remaining.delete(id);
@@ -112,5 +110,6 @@ export function applySavedOrder(
   }
 
   ordered.push(...remaining.values());
+
   return ordered;
 }

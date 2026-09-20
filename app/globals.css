@@ -1,19 +1,37 @@
+
 @import "tailwindcss";
 
+/* ========================================
+   PersonaFeed Theme
+   Geist Font + Purple / Mauve Theme
+   ======================================== */
+
+/* ========================================
+   LIGHT MODE
+   ======================================== */
+
 :root {
-  --background: #f7f6f2;
-  --surface: #ffffff;
-  --foreground: #1b1e23;
-  --muted: #6b7078;
-  --border: #e3e1da;
-  --accent: #4438ca;
+  color-scheme: light;
+
+  --background: #f8edf4;
+  --surface: #fff7fb;
+  --foreground: #2b1725;
+  --muted: #765568;
+  --border: #dfb9ce;
+
+  --accent: #741d5b;
   --accent-foreground: #ffffff;
-  --accent-soft: #ecebfb;
-  --highlight: #975c20;
-  --danger: #b3261e;
-  --danger-soft: #fbeae9;
-  --success: #2e6b4f;
+  --accent-soft: #efd7e5;
+  --highlight: #ad4d7b;
+
+  --danger: #a83250;
+  --danger-soft: #f7d9e1;
+  --success: #527d60;
 }
+
+/* ========================================
+   TAILWIND THEME VARIABLES
+   ======================================== */
 
 @theme inline {
   --color-background: var(--background);
@@ -21,40 +39,120 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-soft: var(--accent-soft);
   --color-highlight: var(--highlight);
+
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-success: var(--success);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --font-sans: var(--font-geist-sans), sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 }
 
+/* ========================================
+   DARK MODE
+   ======================================== */
+
 .dark {
-  --background: #14151a;
-  --surface: #1c1e24;
-  --foreground: #edecea;
-  --muted: #93949c;
-  --border: #2c2e35;
-  --accent: #958dff;
-  --accent-foreground: #14151a;
-  --accent-soft: #262550;
-  --highlight: #e0994f;
-  --danger: #e5867f;
-  --danger-soft: #3a2325;
-  --success: #6fbf9a;
+  color-scheme: dark;
+
+  --background: #1b1b1f;
+  --surface: #241c25;
+  --foreground: #f8edf4;
+  --muted: #c3a6b8;
+  --border: #543449;
+
+  --accent: #ad4d7b;
+  --accent-foreground: #ffffff;
+  --accent-soft: #3d1b35;
+  --highlight: #741d5b;
+
+  --danger: #d96b83;
+  --danger-soft: #4a202f;
+  --success: #91b89b;
 }
+
+/* ========================================
+   GLOBAL HTML STYLES
+   ======================================== */
+
+html {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ========================================
+   BODY
+   ======================================== */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
-  transition: background-color 0.2s ease, color 0.2s ease;
+
+  font-family: var(--font-geist-sans), sans-serif;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
+/* ========================================
+   TEXT SELECTION
+   ======================================== */
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* ========================================
+   FORM CONTROLS
+   ======================================== */
+
+button,
+a,
+input,
+textarea,
+select {
+  accent-color: var(--accent);
+}
+
+/* ========================================
+   KEYBOARD FOCUS
+   ======================================== */
+
 *:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--highlight);
   outline-offset: 2px;
+}
+
+/* ========================================
+   CUSTOM SCROLLBAR
+   ======================================== */
+
+* {
+  scrollbar-color: var(--accent) var(--background);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--highlight);
 }

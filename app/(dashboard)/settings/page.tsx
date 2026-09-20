@@ -55,28 +55,6 @@ export default function SettingsPage() {
       </p>
 
       <div>
-        <h2 className="text-sm font-semibold">Appearance</h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => dispatch(setTheme(value))}
-              aria-pressed={theme === value}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
-                theme === value
-                  ? "border-accent bg-accent-soft text-accent"
-                  : "border-border bg-surface text-muted hover:bg-accent-soft/40"
-              }`}
-            >
-              <Icon size={14} aria-hidden="true" />
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
         <h2 className="text-sm font-semibold">Content interests</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           {INTEREST_OPTIONS.map((category) => (

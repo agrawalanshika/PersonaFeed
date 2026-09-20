@@ -23,11 +23,11 @@ export default function Sidebar({ variant = "static", onNavigate }: SidebarProps
       }
     >
       <div className="flex h-16 items-center gap-2 px-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-sm font-semibold text-accent-foreground">
-          PC
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-xl font-semibold text-accent-foreground">
+          P
         </span>
-        <span className="text-sm font-semibold tracking-tight">
-          Personalized Content
+        <span className="text-xl font-semibold tracking-tight">
+          PersonaFeed
         </span>
       </div>
 
@@ -55,9 +55,6 @@ export default function Sidebar({ variant = "static", onNavigate }: SidebarProps
         })}
       </ul>
 
-      <div className="border-t border-border px-5 py-4 text-xs text-muted">
-        Phase 2 · shell only — data is placeholder
-      </div>
     </nav>
   );
 }

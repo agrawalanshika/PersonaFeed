@@ -25,7 +25,7 @@ export default function TrendingPage() {
     <div className="flex flex-col gap-8">
       <p className="max-w-2xl text-sm text-muted">
         What&apos;s trending right now across news, movies, and social —
-        independent of your personal interests in Settings.
+        independent of your personal interests.
       </p>
 
       <ContentSection
