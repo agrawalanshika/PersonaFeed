@@ -1,4 +1,4 @@
-# ✨ Personalized Content Dashboard 
+# ✨ PersonaFeed - A Personalized Content Dashboard 
 
 A unified, personalized content feed that blends **news, movie recommendations, and social posts** into a single dashboard — built with Next.js, TypeScript, and Redux Toolkit. Pick your interests once, and the feed does the rest: fetching, normalizing, deduplicating, and ranking content from three unrelated APIs into one coherent stream.
 
